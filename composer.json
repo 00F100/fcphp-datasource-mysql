@@ -1,0 +1,29 @@
+{
+    "name": "00f100/fcphp-datasource-mysql",
+    "type": "package",
+    "version": "0.1.0",
+    "description": "Package to manipulate datasource MySQL",
+    "keywords": ["package", "manipulate", "datasource", "mysql", "fcphp", "php7"],
+    "homepage": "https://github.com/00f100/fcphp-datasource-mysql",
+    "authors": [
+        {
+            "name": "João Moraes",
+            "email": "joaomoraesbr@gmail.com",
+            "homepage": "https://github.com/00f100"
+        }
+    ],
+    "require": {
+        "php": ">=7.2",
+        "00f100/fcphp-datasource": "dev-master"
+    },
+    "require-dev": {
+        "00f100/phpdbug": "*",
+        "phpunit/phpunit": "6.*"
+    },
+    "autoload": {
+        "psr-4": {
+            "FcPhp\\Datasource\\MySQL\\": "src/",
+            "FcPhp\\Datasource\\MySQL\\Test\\": "tests/"
+        }
+    }
+}
