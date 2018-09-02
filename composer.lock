@@ -4,23 +4,24 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "content-hash": "1a6b1661e3ddf61f853668e9b0dc544b",
+    "content-hash": "91ffced19c7a9a20b1c7a53a78db5e98",
     "packages": [
         {
             "name": "00f100/fcphp-datasource",
-            "version": "dev-master",
+            "version": "0.1.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/00F100/fcphp-datasource.git",
-                "reference": "906ed821ff73024141306a423b6c347cb99b06eb"
+                "reference": "750babd8cec2f54a55d40839594210229e42a58e"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/00F100/fcphp-datasource/zipball/906ed821ff73024141306a423b6c347cb99b06eb",
-                "reference": "906ed821ff73024141306a423b6c347cb99b06eb",
+                "url": "https://api.github.com/repos/00F100/fcphp-datasource/zipball/750babd8cec2f54a55d40839594210229e42a58e",
+                "reference": "750babd8cec2f54a55d40839594210229e42a58e",
                 "shasum": ""
             },
             "require": {
+                "00f100/fcphp-di": "*",
                 "php": ">=7.2"
             },
             "require-dev": {
@@ -51,7 +52,54 @@
                 "manipulate",
                 "package"
             ],
-            "time": "2018-08-19T01:33:13+00:00"
+            "time": "2018-08-29T01:19:00+00:00"
+        },
+        {
+            "name": "00f100/fcphp-di",
+            "version": "0.3.1",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/00F100/fcphp-di.git",
+                "reference": "de5389b99df10158234006dd3340521dbb6aeffc"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/00F100/fcphp-di/zipball/de5389b99df10158234006dd3340521dbb6aeffc",
+                "reference": "de5389b99df10158234006dd3340521dbb6aeffc",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=7.2"
+            },
+            "require-dev": {
+                "00f100/phpdbug": "*",
+                "phpunit/phpunit": "6.*"
+            },
+            "type": "package",
+            "autoload": {
+                "psr-4": {
+                    "FcPhp\\Di\\": "src/",
+                    "FcPhp\\Di\\Test\\": "tests/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "authors": [
+                {
+                    "name": "João Moraes",
+                    "email": "joaomoraesbr@gmail.com",
+                    "homepage": "https://github.com/00f100"
+                }
+            ],
+            "description": "Dependency Injection for FcPHP",
+            "homepage": "https://github.com/00f100/fcphp-di",
+            "keywords": [
+                "dependency",
+                "di",
+                "fcphp",
+                "injection",
+                "php"
+            ],
+            "time": "2018-08-04T19:16:58+00:00"
         }
     ],
     "packages-dev": [
@@ -1557,9 +1605,7 @@
     ],
     "aliases": [],
     "minimum-stability": "stable",
-    "stability-flags": {
-        "00f100/fcphp-datasource": 20
-    },
+    "stability-flags": [],
     "prefer-stable": false,
     "prefer-lowest": false,
     "platform": {
