@@ -12,15 +12,13 @@ class MySQLCriteriaIntegrationTest extends TestCase
     public function setUp()
     {
         $this->di = DiFacade::getInstance();
-        $this->strategies = [
-            'mysql' => 'FcPhp/Datasource/MySQL/Strategies/MySQLStrategy',
-        ];
+        $this->strategies = [];
         $this->criterias = [
             'mysql' => 'FcPhp/Datasource/MySQL/Criterias/MySQLCriteria'
         ];
 
-        $this->factory = new Factory('mysql', 'mysql', $this->strategies, $this->criterias, $this->di);
-        $this->instance = new MySQLCriteria($this->factory);
+        $this->factory = new Factory($this->strategies, $this->criterias, $this->di);
+        $this->instance = new MySQLCriteria('mysql', $this->factory);
     }
 
     public function testInstance()
