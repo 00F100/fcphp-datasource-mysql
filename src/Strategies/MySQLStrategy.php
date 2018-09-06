@@ -5,6 +5,7 @@ namespace FcPhp\Datasource\MySQL\Strategies
     use FcPhp\Datasource\Strategy;
     use FcPhp\Datasource\Interfaces\IStrategy;
     use FcPhp\Datasource\MySQL\Interfaces\IMySQLStrategy;
+    use FcPhp\Datasource\MySQL\Exceptions\InvalidJoinTypeException;
 
     class MySQLStrategy extends Strategy implements IStrategy, IMySQLStrategy
     {
@@ -21,6 +22,7 @@ namespace FcPhp\Datasource\MySQL\Strategies
         protected $table;
         protected $tableAlias;
         protected $join = [];
+        protected $joins = ['LEFT', 'RIGHT', 'INNER', 'OUTER', 'NATURAL', 'STRAIGHT'];
         protected $where = [];
         protected $groupBy = [];
         protected $groupByWithRollup;
@@ -108,10 +110,13 @@ namespace FcPhp\Datasource\MySQL\Strategies
             return $this;
         }
 
-        public function join(string $joinType, string $field, string $condition, string $value)
+        public function join(string $joinType, array $tables, object $condition = null, array $using = [], bool $crossJoin = false)
         {
-            $this->join[] = compact('joinType', 'field', 'condition', 'value');
-            return $this;
+            if(in_array($joinType, $this->joins)) {
+                $this->join[] = compact('joinType', 'tables', 'condition', 'using', 'crossJoin');
+                return $this;
+            }
+            throw new InvalidJoinTypeException();
         }
 
         public function where(object $callback)
@@ -164,21 +169,72 @@ namespace FcPhp\Datasource\MySQL\Strategies
             return $this;
         }
 
-        
+
 
         private function mountJoin(array $joins)
         {
             if(count($joins)) {
                 foreach($joins as $index => $join) {
-                    $joins[$index] = implode(' ', $join);
+                    $criteria = $this->getCriteria();
+                    $callback = $join['condition'];
+                    $callback($criteria);
+                    $joins[$index] = $this->mountJoinType($join['joinType']) . ' ' . $this->mountJoinTable($join['tables']) . ' ON (' . $this->mountWhere($criteria
+                        ->getWhere()) . ')';
                 }
             }
             return $joins;
         }
 
+        private function mountJoinType(string $joinType)
+        {
+            if($joinType == 'STRAIGHT') {
+                return $joinType . '_JOIN';
+            }
+            return $joinType. ' JOIN';
+        }
+
+        private function mountJoinTable($tables)
+        {
+            if(is_array($tables)) {
+                foreach($tables as $index => $table) {
+                    if(!is_int($index)) {
+                        $tables[$index] .= ' AS ' . $index;
+                    }
+                }
+                return '(' . implode(',', $tables) . ')';
+            }
+            return $tables;
+        }
+
         private function mountWhere(array $where)
         {
-            return $where;
+            $sql = ' WHERE 1=1';
+            $condition = ' AND ';
+            if(count($where) > 0) {
+                $sql .= ' AND (';
+                // $condition = ' AND ';
+                if(count($where) == 1) {
+                    $sql .= current($where);
+                }else{
+                    foreach($where as $command) {
+                        if(is_string($command)) {
+                            $condition = ' ' . $command . ' ';
+                            continue;
+                        }
+                        if(is_array($command)) {
+                            $sql .= $this->mountConditionWhere($command, $condition);
+                        }
+                        
+                    }
+                }
+                $sql .= ')';
+            }
+            return $sql;
+        }
+
+        private function mountConditionWhere(array $where, string $condition)
+        {
+
         }
 
         private function mountGroupBy(array $groupBy)
