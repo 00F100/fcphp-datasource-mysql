@@ -32,6 +32,20 @@ namespace FcPhp\Datasource\MySQL\Strategies
         protected $limit;
         protected $offset;
 
+
+
+
+
+        public function getWhere()
+        {
+            return $this->mountWhere($this->where);
+        }
+
+
+
+
+
+
         public function getSQL()
         {
             $select = $this->selectInstruction;
@@ -44,7 +58,7 @@ namespace FcPhp\Datasource\MySQL\Strategies
             $select = str_replace('[table]', $this->table, $select);
             $select = str_replace('[tableAlias]', $this->tableAlias, $select);
             $select = str_replace('[join]', (count($this->join) > 0 ? implode(' ', $this->mountJoin($this->join)) : ''), $select);
-            $select = str_replace('[where]', (count($this->where) > 0 ? implode(' ', $this->mountWhere($this->where)) : ''), $select);
+            $select = str_replace('[where]', (count($this->where) > 0 ? 'WHERE ' . $this->mountWhere($this->where) : ''), $select);
             $select = str_replace('[groupBy]', (count($this->groupBy) > 0 ? implode(' ', $this->mountGroupBy($this->groupBy)) : ''), $select);
             $select = str_replace('[groupByWithRollup]', ($this->groupByWithRollup == true ? 'WITH ROLLUP' : ''), $select);
             $select = str_replace('[having]', (count($this->having) > 0 ? implode(' ', $this->mountHaving($this->having)) : ''), $select);
@@ -52,6 +66,8 @@ namespace FcPhp\Datasource\MySQL\Strategies
             $select = str_replace('[orderByWithRollup]', ($this->orderByWithRollup == true ? 'WITH ROLLUP' : ''), $select);
             $select = str_replace('[limit]', (!empty($this->limit) ? 'LIMIT ' . $this->limit : ''), $select);
             $select = str_replace('[offset]', (!empty($this->offset) ? 'OFFSET ' . $this->offset : ''), $select);
+
+            return $select;
         }
 
         public function selectRule(string $rule)
@@ -65,12 +81,6 @@ namespace FcPhp\Datasource\MySQL\Strategies
         public function highPriority(bool $highPriority)
         {
             $this->highPriority = $highPriority;
-            return $this;
-        }
-
-        public function straightJoin(bool $straightJoin)
-        {
-            $this->straightJoin = $straightJoin;
             return $this;
         }
 
@@ -94,7 +104,7 @@ namespace FcPhp\Datasource\MySQL\Strategies
             return $this;
         }
 
-        public function select($fields)
+        public function select($fields) :IStrategy
         {
             if(!is_array($fields)) {
                 $fields = [$fields];
@@ -103,7 +113,7 @@ namespace FcPhp\Datasource\MySQL\Strategies
             return $this;
         }
 
-        public function from(string $table, string $alias)
+        public function from(string $table, string $alias) :IStrategy
         {
             $this->table = $table;
             $this->tableAlias = $alias;
@@ -119,7 +129,7 @@ namespace FcPhp\Datasource\MySQL\Strategies
             throw new InvalidJoinTypeException();
         }
 
-        public function where(object $callback)
+        public function where(object $callback) :IStrategy
         {
             $criteria = $this->getCriteria();
             $callback($criteria);
@@ -206,30 +216,34 @@ namespace FcPhp\Datasource\MySQL\Strategies
             return $tables;
         }
 
-        private function mountWhere(array $where)
+        private function mountWhere(array $where, string $argCondition = 'AND')
         {
-            $sql = ' WHERE 1=1';
-            $condition = ' AND ';
-            if(count($where) > 0) {
-                $sql .= ' AND (';
-                // $condition = ' AND ';
-                if(count($where) == 1) {
-                    $sql .= current($where);
-                }else{
-                    foreach($where as $command) {
-                        if(is_string($command)) {
-                            $condition = ' ' . $command . ' ';
-                            continue;
-                        }
-                        if(is_array($command)) {
-                            $sql .= $this->mountConditionWhere($command, $condition);
-                        }
-                        
-                    }
+            $parentCondition = $argCondition;
+            $condition = [];
+            $condition[] = '(';
+            $conditionCommands = ['AND', 'OR'];
+            foreach($where as $key => $content) {
+                if(is_string($content) && in_array($content, $conditionCommands)) {
+                    $argCondition = $content;
+                    continue;
                 }
-                $sql .= ')';
+                if(is_string($content)) {
+                    $condition[] = $content;
+                    if(($key+1) < count($where)) {
+                        $condition[] = $parentCondition;
+                    }
+                    continue;
+                }
+                if(is_array($content)) {
+                    $condition[] = $this->mountWhere($content, $argCondition);
+                    if(($key+1) < count($where)) {
+                        $condition[] = $parentCondition;
+                    }
+                    continue;
+                }
             }
-            return $sql;
+            $condition[] = ')';
+            return implode(' ', $condition);
         }
 
         private function mountConditionWhere(array $where, string $condition)
