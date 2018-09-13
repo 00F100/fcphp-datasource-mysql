@@ -32,20 +32,6 @@ namespace FcPhp\Datasource\MySQL\Strategies
         protected $limit;
         protected $offset;
 
-
-
-
-
-        public function getWhere()
-        {
-            return $this->mountWhere($this->where);
-        }
-
-
-
-
-
-
         public function getSQL()
         {
             $select = $this->selectInstruction;
@@ -54,7 +40,7 @@ namespace FcPhp\Datasource\MySQL\Strategies
             $select = str_replace('[straightJoin]', ($this->straightJoin == true ? 'STRAIGHT_JOIN' : ''), $select);
             $select = str_replace('[sizeResult]', (count($this->sizeResult) > 0 ? implode(' ', $this->sizeResult) : ''), $select);
             $select = str_replace('[noCache]', ($this->noCache == true ? 'SQL_NO_CACHE' : ''), $select);
-            $select = str_replace('[select]', implode(' ', $this->select), $select);
+            $select = str_replace('[select]', implode(',', $this->select), $select);
             $select = str_replace('[table]', $this->table, $select);
             $select = str_replace('[tableAlias]', $this->tableAlias, $select);
             $select = str_replace('[join]', (count($this->join) > 0 ? implode(' ', $this->mountJoin($this->join)) : ''), $select);
@@ -120,7 +106,7 @@ namespace FcPhp\Datasource\MySQL\Strategies
             return $this;
         }
 
-        public function join(string $joinType, array $tables, object $condition = null, array $using = [], bool $crossJoin = false)
+        public function join(string $joinType, array $tables, object $condition, array $using = [], bool $crossJoin = false)
         {
             if(in_array($joinType, $this->joins)) {
                 $this->join[] = compact('joinType', 'tables', 'condition', 'using', 'crossJoin');
