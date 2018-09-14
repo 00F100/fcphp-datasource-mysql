@@ -9,43 +9,80 @@ namespace FcPhp\Datasource\MySQL\Strategies
 
     class MySQLStrategy extends Strategy implements IStrategy, IMySQLStrategy
     {
-        protected $selectInstruction = 'SELECT [selectRule] [highPriority] [straightJoin] [sizeResult] [noCache] [select] FROM [table] AS [tableAlias] [join] [where] [groupBy] [groupByWithRollup] [having] [orderBy] [orderByWithRollup] [limit] [offset] ';
+        const DATASOURCE_MYSQL_STRATEGY_SELECT = 0;
+        const DATASOURCE_MYSQL_STRATEGY_INSERT = 1;
+        const DATASOURCE_MYSQL_STRATEGY_UPDATE = 2;
+        const DATASOURCE_MYSQL_STRATEGY_DELETE = 2;
+        const DATASOURCE_MYSQL_STRATEGY_CREATE = 3;
+        const DATASOURCE_MYSQL_STRATEGY_ALTER = 4;
+        const DATASOURCE_MYSQL_STRATEGY_DROP = 5;
+        const DATASOURCE_MYSQL_STRATEGY_RENAME = 6;
+        const DATASOURCE_MYSQL_STRATEGY_TRUNCATE = 7;
+        const DATASOURCE_MYSQL_STRATEGY_CALL = 7;
+        const DATASOURCE_MYSQL_STRATEGY_TRANSACTION = 8;
+        const DATASOURCE_MYSQL_STRATEGY_LOCK = 9;
+        const DATASOURCE_MYSQL_STRATEGY_PREPARE = 10;
+        const DATASOURCE_MYSQL_STRATEGY_SET = 11;
+        const DATASOURCE_MYSQL_STRATEGY_EXECUTE = 12;
+        const DATASOURCE_MYSQL_STRATEGY_DEALLOCATE = 13;
+        const DATASOURCE_MYSQL_STRATEGY_BEGIN = 14;
+        const DATASOURCE_MYSQL_STRATEGY_REPEAT = 14;
+        const DATASOURCE_MYSQL_STRATEGY_DELIMITER = 15;
 
-        protected $selectRule;
-        protected $selectRules = ['ALL', 'DISTINCT', 'DISTINCTROW'];
-        protected $highPriority;
-        protected $straightJoin;
-        protected $sizeResult = [];
-        protected $sizeResults = ['SQL_SMALL_RESULT', 'SQL_BIG_RESULT', 'SQL_BUFFER_RESULT'];
-        protected $noCache;
-        protected $select = [];
-        protected $table;
-        protected $tableAlias;
-        protected $join = [];
-        protected $joins = ['LEFT', 'RIGHT', 'INNER', 'OUTER', 'NATURAL', 'STRAIGHT'];
-        protected $where = [];
-        protected $groupBy = [];
-        protected $groupByWithRollup;
-        protected $having = [];
-        protected $orderBy = [];
-        protected $orderByWithRollup;
-        protected $limit;
-        protected $offset;
+        protected $availableMethods = [
+            self::DATASOURCE_MYSQL_STRATEGY_SELECT => 'select',
+            self::DATASOURCE_MYSQL_STRATEGY_INSERT => 'insert',
+            self::DATASOURCE_MYSQL_STRATEGY_UPDATE => 'update',
+            self::DATASOURCE_MYSQL_STRATEGY_DELETE => 'delete',
+            self::DATASOURCE_MYSQL_STRATEGY_CREATE => 'create',
+            self::DATASOURCE_MYSQL_STRATEGY_ALTER => 'alter',
+            self::DATASOURCE_MYSQL_STRATEGY_DROP => 'drop',
+            self::DATASOURCE_MYSQL_STRATEGY_RENAME => 'rename',
+            self::DATASOURCE_MYSQL_STRATEGY_TRUNCATE => 'truncate',
+            self::DATASOURCE_MYSQL_STRATEGY_CALL => 'call',
+            self::DATASOURCE_MYSQL_STRATEGY_TRANSACTION => 'transaction',
+            self::DATASOURCE_MYSQL_STRATEGY_LOCK => 'lock',
+            self::DATASOURCE_MYSQL_STRATEGY_PREPARE => 'prepare', 
+            self::DATASOURCE_MYSQL_STRATEGY_SET => 'set', 
+            self::DATASOURCE_MYSQL_STRATEGY_EXECUTE => 'execute', 
+            self::DATASOURCE_MYSQL_STRATEGY_DEALLOCATE => 'deallocate', 
+            self::DATASOURCE_MYSQL_STRATEGY_BEGIN => 'begin', 
+            self::DATASOURCE_MYSQL_STRATEGY_REPEAT => 'repeat', 
+            self::DATASOURCE_MYSQL_STRATEGY_DELIMITER => 'delimiter', 
+
+        ];
+        protected $mode;
+        protected $mySQLFactory;
+
+        public function __construct(string $criteria, IFactory $factory, IMySQLFactory $mySQLFactory)
+        {
+            $this->mySQLFactory = $mySQLFactory;
+            parent::__construct($criteria, $factory);
+        }
+
+        public function __call(string $method, array $args)
+        {
+            if(in_array($method, $this->availableMethods)) {
+                return $this->mySQLFactory->get($method);
+            }
+        }
 
         public function getSQL()
         {
-            $select = $this->selectInstruction;
-            $select = str_replace('[selectRule]', (!empty($this->selectRule) ? $this->selectRule : ''), $select);
-            $select = str_replace('[highPriority]', ($this->highPriority == true ? 'HIGH_PRIORITY' : ''), $select);
-            $select = str_replace('[straightJoin]', ($this->straightJoin == true ? 'STRAIGHT_JOIN' : ''), $select);
-            $select = str_replace('[sizeResult]', (count($this->sizeResult) > 0 ? implode(' ', $this->sizeResult) : ''), $select);
-            $select = str_replace('[noCache]', ($this->noCache == true ? 'SQL_NO_CACHE' : ''), $select);
-            $select = str_replace('[select]', implode(',', $this->select), $select);
-            $select = str_replace('[table]', $this->table, $select);
-            $select = str_replace('[tableAlias]', $this->tableAlias, $select);
-            $select = str_replace('[join]', (count($this->join) > 0 ? implode(' ', $this->mountJoin($this->join)) : ''), $select);
-            $select = str_replace('[where]', (count($this->where) > 0 ? 'WHERE ' . $this->mountWhere($this->where) : ''), $select);
-            $select = str_replace('[groupBy]', (count($this->groupBy) > 0 ? implode(' ', $this->mountGroupBy($this->groupBy)) : ''), $select);
+            $sql = $this->selectInstruction;
+            $sql .= str_replace('[selectRule]', (!empty($this->selectRule) ? $this->selectRule : ''), $select);
+            // $sql = str_replace('[selectRule]', (!empty($this->selectRule) ? $this->selectRule : ''), $select);
+            $sql = str_replace('[highPriority]', ($this->highPriority == true ? 'HIGH_PRIORITY' : ''), $select);
+            $sql = str_replace('[straightJoin]', ($this->straightJoin == true ? 'STRAIGHT_JOIN' : ''), $select);
+            $sql = str_replace('[sizeResult]', (count($this->sizeResult) > 0 ? implode(' ', $this->sizeResult) : ''), $select);
+            $sql = str_replace('[noCache]', ($this->noCache == true ? 'SQL_NO_CACHE' : ''), $select);
+            $sql = str_replace('[sqlCalcFoundRows]', ($this->sqlCalcFoundRows == true ? 'SQL_CALC_FOUND_ROWS' : ''), $select);
+            $sql = str_replace('[select]', implode(',', $this->select), $select);
+            $sql = str_replace('[table]', $this->table, $select);
+            $sql = str_replace('[tableAlias]', $this->tableAlias, $select);
+            $sql = str_replace('[join]', (count($this->join) > 0 ? implode(' ', $this->mountJoin($this->join)) : ''), $select);
+            $sql = str_replace('[where]', (count($this->where) > 0 ? 'WHERE ' . $this->mountWhere($this->where) : ''), $select);
+            $sql = str_replace('[groupBy]', (count($this->groupBy) > 0 ? implode(' ', $this->mountGroupBy($this->groupBy)) : ''), $select);
             $select = str_replace('[groupByWithRollup]', ($this->groupByWithRollup == true ? 'WITH ROLLUP' : ''), $select);
             $select = str_replace('[having]', (count($this->having) > 0 ? implode(' ', $this->mountHaving($this->having)) : ''), $select);
             $select = str_replace('[orderBy]', (count($this->orderBy) > 0 ? implode(' ', $this->mountOrderBy($this->orderBy)) : ''), $select);
@@ -56,200 +93,6 @@ namespace FcPhp\Datasource\MySQL\Strategies
             return $select;
         }
 
-        public function selectRule(string $rule)
-        {
-            if(in_array($rule, $this->selectRules)) {
-                $this->selectRule = $rule;
-            }
-            return $this;
-        }
-
-        public function highPriority(bool $highPriority)
-        {
-            $this->highPriority = $highPriority;
-            return $this;
-        }
-
-        public function straightJoin(bool $straightJoin)
-        {
-            $this->straightJoin = $straightJoin;
-            return $this;
-        }
-
-        public function sizeResult(string $size)
-        {
-            if(in_array($size, $this->sizeResults)) {
-                $this->sizeResult[] = $size;
-            }
-            return $this;
-        }
-
-        public function noCache(bool $noCache)
-        {
-            $this->noCache = $noCache;
-            return $this;
-        }
-
-        public function select($fields) :IStrategy
-        {
-            if(!is_array($fields)) {
-                $fields = [$fields];
-            }
-            $this->select = $fields;
-            return $this;
-        }
-
-        public function from(string $table, string $alias) :IStrategy
-        {
-            $this->table = $table;
-            $this->tableAlias = $alias;
-            return $this;
-        }
-
-        public function join(string $joinType, array $tables, object $condition, array $using = [], bool $crossJoin = false)
-        {
-            if(in_array($joinType, $this->joins)) {
-                $this->join[] = compact('joinType', 'tables', 'condition', 'using', 'crossJoin');
-                return $this;
-            }
-            throw new InvalidJoinTypeException();
-        }
-
-        public function where(object $callback) :IStrategy
-        {
-            $criteria = $this->getCriteria();
-            $callback($criteria);
-            $this->where = array_merge($this->where, $criteria->getWhere());
-            return $this;
-        }
-
-        public function groupBy(string $field)
-        {
-            $this->groupBy[] = $field;
-            return $this;
-        }
-
-        public function groupByWithRollup(bool $groupByWithRollup)
-        {
-            $this->groupByWithRollup = $groupByWithRollup;
-            return $this;
-        }
-
-        public function having(string $field, string $condition, string $value)
-        {
-            $this->having[] = compact('field', 'condition', 'value');
-            return $this;
-        }
-
-        public function orderBy(string $field, string $order)
-        {
-            $this->orderBy[] = compact('field', 'order');
-            return $this;
-        }
-
-        public function orderByWithRollup(bool $orderByWithRollup)
-        {
-            $this->orderByWithRollup = $orderByWithRollup;
-            return $this;
-        }
-
-        public function limit(int $limit)
-        {
-            $this->limit = $limit;
-            return $this;
-        }
-
-        public function offset(int $offset)
-        {
-            $this->offset = $offset;
-            return $this;
-        }
-
-
-
-        private function mountJoin(array $joins)
-        {
-            if(count($joins)) {
-                foreach($joins as $index => $join) {
-                    $criteria = $this->getCriteria();
-                    $callback = $join['condition'];
-                    $callback($criteria);
-                    $joins[$index] = $this->mountJoinType($join['joinType']) . ' ' . $this->mountJoinTable($join['tables']) . ' ON (' . $this->mountWhere($criteria
-                        ->getWhere()) . ')';
-                }
-            }
-            return $joins;
-        }
-
-        private function mountJoinType(string $joinType)
-        {
-            if($joinType == 'STRAIGHT') {
-                return $joinType . '_JOIN';
-            }
-            return $joinType. ' JOIN';
-        }
-
-        private function mountJoinTable($tables)
-        {
-            if(is_array($tables)) {
-                foreach($tables as $index => $table) {
-                    if(!is_int($index)) {
-                        $tables[$index] .= ' AS ' . $index;
-                    }
-                }
-                return '(' . implode(',', $tables) . ')';
-            }
-            return $tables;
-        }
-
-        private function mountWhere(array $where, string $argCondition = 'AND')
-        {
-            $parentCondition = $argCondition;
-            $condition = [];
-            $condition[] = '(';
-            $conditionCommands = ['AND', 'OR'];
-            foreach($where as $key => $content) {
-                if(is_string($content) && in_array($content, $conditionCommands)) {
-                    $argCondition = $content;
-                    continue;
-                }
-                if(is_string($content)) {
-                    $condition[] = $content;
-                    if(($key+1) < count($where)) {
-                        $condition[] = $parentCondition;
-                    }
-                    continue;
-                }
-                if(is_array($content)) {
-                    $condition[] = $this->mountWhere($content, $argCondition);
-                    if(($key+1) < count($where)) {
-                        $condition[] = $parentCondition;
-                    }
-                    continue;
-                }
-            }
-            $condition[] = ')';
-            return implode(' ', $condition);
-        }
-
-        private function mountConditionWhere(array $where, string $condition)
-        {
-
-        }
-
-        private function mountGroupBy(array $groupBy)
-        {
-            return $groupBy;
-        }
-
-        private function mountHaving(array $having)
-        {
-            return $having;
-        }
-
-        private function mountOrderBy(array $orderBy)
-        {
-            return $orderBy;
-        }
+        
     }
 }
