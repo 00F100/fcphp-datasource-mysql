@@ -5,7 +5,8 @@ use FcPhp\Datasource\MySQL\Strategies\MySQLStrategy;
 use FcPhp\Datasource\MySQL\Interfaces\IMySQLStrategy;
 use FcPhp\Datasource\Interfaces\ICriteria;
 use FcPhp\Datasource\Interfaces\IStrategy;
-
+use FcPhp\Datasource\Interfaces\IFactory;
+use FcPhp\Datasource\MySQL\Interfaces\Strategies\Select\ISelect;
 use FcPhp\Di\Facades\DiFacade;
 use FcPhp\Datasource\Factories\Factory;
 use FcPhp\Datasource\MySQL\Factories\MySQLFactory;
@@ -21,33 +22,31 @@ class MySQLStrategyIntegrationTest extends TestCase
         ];
         $this->methods = [
             'select' => 'FcPhp\Datasource\MySQL\Strategies\Select\Select',
-            'insert' => 'FcPhp\Datasource\MySQL\Strategies\Insert\Insert',
-            'update' => 'FcPhp\Datasource\MySQL\Strategies\Update\Update',
-            'delete' => 'FcPhp\Datasource\MySQL\Strategies\Delete\Delete',
-            'create' => 'FcPhp\Datasource\MySQL\Strategies\Create\Create',
-            'alter' => 'FcPhp\Datasource\MySQL\Strategies\Alter\Alter',
-            'drop' => 'FcPhp\Datasource\MySQL\Strategies\Drop\Drop',
-            'rename' => 'FcPhp\Datasource\MySQL\Strategies\Rename\Rename',
-            'truncate' => 'FcPhp\Datasource\MySQL\Strategies\Truncate\Truncate',
-            'call' => 'FcPhp\Datasource\MySQL\Strategies\Call\Call',
-            'transaction' => 'FcPhp\Datasource\MySQL\Strategies\Transaction\Transaction',
-            'lock' => 'FcPhp\Datasource\MySQL\Strategies\Lock\Lock',
-            'prepare' => 'FcPhp\Datasource\MySQL\Strategies\Prepare\Prepare',
-            'set' => 'FcPhp\Datasource\MySQL\Strategies\Set\Set',
-            'execute' => 'FcPhp\Datasource\MySQL\Strategies\Execute\Execute',
-            'deallocate' => 'FcPhp\Datasource\MySQL\Strategies\Deallocate\Deallocate',
-            'begin' => 'FcPhp\Datasource\MySQL\Strategies\Begin\Begin',
-            'repeat' => 'FcPhp\Datasource\MySQL\Strategies\Repeat\Repeat',
-            'delimiter' => 'FcPhp\Datasource\MySQL\Strategies\Delimiter\Delimiter',
+            // 'insert' => 'FcPhp\Datasource\MySQL\Strategies\Insert\Insert',
+            // 'update' => 'FcPhp\Datasource\MySQL\Strategies\Update\Update',
+            // 'delete' => 'FcPhp\Datasource\MySQL\Strategies\Delete\Delete',
+            // 'create' => 'FcPhp\Datasource\MySQL\Strategies\Create\Create',
+            // 'alter' => 'FcPhp\Datasource\MySQL\Strategies\Alter\Alter',
+            // 'drop' => 'FcPhp\Datasource\MySQL\Strategies\Drop\Drop',
+            // 'rename' => 'FcPhp\Datasource\MySQL\Strategies\Rename\Rename',
+            // 'truncate' => 'FcPhp\Datasource\MySQL\Strategies\Truncate\Truncate',
+            // 'call' => 'FcPhp\Datasource\MySQL\Strategies\Call\Call',
+            // 'transaction' => 'FcPhp\Datasource\MySQL\Strategies\Transaction\Transaction',
+            // 'lock' => 'FcPhp\Datasource\MySQL\Strategies\Lock\Lock',
+            // 'prepare' => 'FcPhp\Datasource\MySQL\Strategies\Prepare\Prepare',
+            // 'set' => 'FcPhp\Datasource\MySQL\Strategies\Set\Set',
+            // 'execute' => 'FcPhp\Datasource\MySQL\Strategies\Execute\Execute',
+            // 'deallocate' => 'FcPhp\Datasource\MySQL\Strategies\Deallocate\Deallocate',
+            // 'begin' => 'FcPhp\Datasource\MySQL\Strategies\Begin\Begin',
+            // 'repeat' => 'FcPhp\Datasource\MySQL\Strategies\Repeat\Repeat',
+            // 'delimiter' => 'FcPhp\Datasource\MySQL\Strategies\Delimiter\Delimiter',
         ];
         $this->criteria = 'mysql';
 
         $this->factory = new Factory($this->strategies, $this->criterias, $this->di);
-        $this->mySQLFactory = new MySQLFactory($this->di);
+        $this->mySQLFactory = new MySQLFactory($this->di, $this->methods);
 
         $this->instance = new MySQLStrategy($this->criteria, $this->factory, $this->mySQLFactory);
-
-        d('$this->instance', true);
     }
 
     public function testInstance()
@@ -55,68 +54,69 @@ class MySQLStrategyIntegrationTest extends TestCase
         $this->assertInstanceOf(IMySQLStrategy::class, $this->instance);
     }
 
-    // public function testSelect()
-    // {
-    //     $select = $this->instance->select('t.field');
-    //     $this->assertInstanceOf(IStrategy::class, $select);
-    //     $this->assertEquals('SELECT      t.field FROM  AS           ', $select->getSQL());
-    // }
+    public function testSelect()
+    {
+        $select = $this->instance->select('t.field');
+        $this->assertInstanceOf(ISelect::class, $select);
+        $this->assertEquals('SELECT t.field FROM  AS ', $select->getSQL());
+    }
 
-    // public function testSelectRuleDistinct()
-    // {
-    //     $selectRule = $this->instance->selectRule('DISTINCT');
-    //     $this->assertInstanceOf(IStrategy::class, $selectRule);
-    //     $this->assertEquals('SELECT DISTINCT      FROM  AS           ', $selectRule->getSQL());
-    // }
+    public function testSelectRuleDistinct()
+    {
+        $selectRule = $this->instance->select('t.field')->selectRule('DISTINCT');
+        $this->assertInstanceOf(ISelect::class, $selectRule);
+        $this->assertEquals('SELECT DISTINCT t.field FROM  AS ', $selectRule->getSQL());
+    }
 
-    // public function testSelectRuleAll()
-    // {
-    //     $selectRule = $this->instance->selectRule('ALL');
-    //     $this->assertInstanceOf(IStrategy::class, $selectRule);
-    //     $this->assertEquals('SELECT ALL      FROM  AS           ', $selectRule->getSQL());
-    // }
+    public function testSelectRuleAll()
+    {
+        $selectRule = $this->instance->select('t.field')->selectRule('ALL');
+        $this->assertInstanceOf(ISelect::class, $selectRule);
+        $this->assertEquals('SELECT ALL t.field FROM  AS ', $selectRule->getSQL());
+    }
 
-    // public function testSelectRuleDistinctRow()
-    // {
-    //     $selectRule = $this->instance->selectRule('DISTINCTROW');
-    //     $this->assertInstanceOf(IStrategy::class, $selectRule);
-    //     $this->assertEquals('SELECT DISTINCTROW      FROM  AS           ', $selectRule->getSQL());
-    // }
+    public function testSelectRuleDistinctRow()
+    {
+        $selectRule = $this->instance->select('t.field')->selectRule('DISTINCTROW');
+        $this->assertInstanceOf(ISelect::class, $selectRule);
+        $this->assertEquals('SELECT DISTINCTROW t.field FROM  AS ', $selectRule->getSQL());
+    }
 
-    // public function testHighPriority()
-    // {
-    //     $highPriority = $this->instance->highPriority(true);
-    //     $this->assertInstanceOf(IStrategy::class, $highPriority);
-    //     $this->assertEquals('SELECT  HIGH_PRIORITY     FROM  AS           ', $highPriority->getSQL());
-    // }
+    public function testHighPriority()
+    {
+        $highPriority = $this->instance->select('t.field')->highPriority(true);
+        $this->assertInstanceOf(ISelect::class, $highPriority);
+        $this->assertEquals('SELECT HIGH_PRIORITY t.field FROM  AS ', $highPriority->getSQL());
+    }
 
-    // public function testStraightJoin()
-    // {
-    //     $straightJoin = $this->instance->straightJoin(true);
-    //     $this->assertInstanceOf(IStrategy::class, $straightJoin);
-    //     $this->assertEquals('SELECT   STRAIGHT_JOIN    FROM  AS           ', $straightJoin->getSQL());
-    // }
+    public function testStraightJoin()
+    {
+        $straightJoin = $this->instance->select('t.field')->straightJoin(true);
+        $this->assertInstanceOf(ISelect::class, $straightJoin);
+        $this->assertEquals('SELECT STRAIGHT_JOIN t.field FROM  AS ', $straightJoin->getSQL());
+    }
 
-    // public function testSizeResultSqlSmallResult()
-    // {
-    //     $sizeResult = $this->instance->sizeResult('SQL_SMALL_RESULT');
-    //     $this->assertInstanceOf(IStrategy::class, $sizeResult);
-    //     $this->assertEquals('SELECT    SQL_SMALL_RESULT   FROM  AS           ', $sizeResult->getSQL());
-    // }
+    public function testSizeResultSqlSmallResult()
+    {
+        $sizeResult = $this->instance->select('t.field')->sizeResult('SQL_SMALL_RESULT');
+        $this->assertInstanceOf(ISelect::class, $sizeResult);
+        $this->assertEquals('SELECT SQL_SMALL_RESULT t.field FROM  AS ', $sizeResult->getSQL());
+    }
 
-    // public function testSizeResultSqlBigResult()
-    // {
-    //     $sizeResult = $this->instance->sizeResult('SQL_BIG_RESULT');
-    //     $this->assertInstanceOf(IStrategy::class, $sizeResult);
-    //     $this->assertEquals('SELECT    SQL_BIG_RESULT   FROM  AS           ', $sizeResult->getSQL());
-    // }
+    public function testSizeResultSqlBigResult()
+    {
+        $sizeResult = $this->instance->select('t.field')->sizeResult('SQL_BIG_RESULT');
+        $this->assertInstanceOf(ISelect::class, $sizeResult);
+        $this->assertEquals('SELECT SQL_BIG_RESULT t.field FROM  AS ', $sizeResult->getSQL());
+    }
 
-    // public function testSizeResultSqlBufferResult()
-    // {
-    //     $sizeResult = $this->instance->sizeResult('SQL_BUFFER_RESULT');
-    //     $this->assertInstanceOf(IStrategy::class, $sizeResult);
-    //     $this->assertEquals('SELECT    SQL_BUFFER_RESULT   FROM  AS           ', $sizeResult->getSQL());
-    // }
+    public function testSizeResultSqlBufferResult()
+    {
+        $sizeResult = $this->instance->select('t.field')->sizeResult('SQL_BUFFER_RESULT');
+        $this->assertInstanceOf(ISelect::class, $sizeResult);
+        d($sizeResult->getSQL().'"', true);
+        $this->assertEquals('SELECT SQL_BUFFER_RESULT t.field FROM  AS ', $sizeResult->getSQL());
+    }
 
     // public function testNoCache()
     // {

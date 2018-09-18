@@ -23,7 +23,7 @@ namespace FcPhp\Datasource\MySQL\Factories
                 if(!$this->di->has($methodAlias)) {
                     $this->di->setNonSingleton($methodAlias, str_replace('/', '\\', $methodAlias));
                 }
-                return $this->di->get($methodAlias);
+                return $this->di->make($methodAlias);
             }
         }
     }

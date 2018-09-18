@@ -4,7 +4,9 @@ namespace FcPhp\Datasource\MySQL\Strategies
 {
     use FcPhp\Datasource\Strategy;
     use FcPhp\Datasource\Interfaces\IStrategy;
+    use FcPhp\Datasource\Interfaces\IFactory;
     use FcPhp\Datasource\MySQL\Interfaces\IMySQLStrategy;
+    use FcPhp\Datasource\MySQL\Interfaces\IMySQLFactory;
     use FcPhp\Datasource\MySQL\Exceptions\InvalidJoinTypeException;
 
     class MySQLStrategy extends Strategy implements IStrategy, IMySQLStrategy
@@ -63,36 +65,10 @@ namespace FcPhp\Datasource\MySQL\Strategies
         public function __call(string $method, array $args)
         {
             if(in_array($method, $this->availableMethods)) {
-                return $this->mySQLFactory->get($method);
+                $this->mode = $this->availableMethods[constant('FcPhp\Datasource\MySQL\Strategies\MySQLStrategy::DATASOURCE_MYSQL_STRATEGY_' . strtoupper($method))];
+                $instance = $this->mySQLFactory->get($method);
+                return call_user_func_array([$instance, $method], $args);
             }
-        }
-
-        public function getSQL()
-        {
-            $sql = $this->selectInstruction;
-            $sql .= str_replace('[selectRule]', (!empty($this->selectRule) ? $this->selectRule : ''), $select);
-            // $sql = str_replace('[selectRule]', (!empty($this->selectRule) ? $this->selectRule : ''), $select);
-            $sql = str_replace('[highPriority]', ($this->highPriority == true ? 'HIGH_PRIORITY' : ''), $select);
-            $sql = str_replace('[straightJoin]', ($this->straightJoin == true ? 'STRAIGHT_JOIN' : ''), $select);
-            $sql = str_replace('[sizeResult]', (count($this->sizeResult) > 0 ? implode(' ', $this->sizeResult) : ''), $select);
-            $sql = str_replace('[noCache]', ($this->noCache == true ? 'SQL_NO_CACHE' : ''), $select);
-            $sql = str_replace('[sqlCalcFoundRows]', ($this->sqlCalcFoundRows == true ? 'SQL_CALC_FOUND_ROWS' : ''), $select);
-            $sql = str_replace('[select]', implode(',', $this->select), $select);
-            $sql = str_replace('[table]', $this->table, $select);
-            $sql = str_replace('[tableAlias]', $this->tableAlias, $select);
-            $sql = str_replace('[join]', (count($this->join) > 0 ? implode(' ', $this->mountJoin($this->join)) : ''), $select);
-            $sql = str_replace('[where]', (count($this->where) > 0 ? 'WHERE ' . $this->mountWhere($this->where) : ''), $select);
-            $sql = str_replace('[groupBy]', (count($this->groupBy) > 0 ? implode(' ', $this->mountGroupBy($this->groupBy)) : ''), $select);
-            $select = str_replace('[groupByWithRollup]', ($this->groupByWithRollup == true ? 'WITH ROLLUP' : ''), $select);
-            $select = str_replace('[having]', (count($this->having) > 0 ? implode(' ', $this->mountHaving($this->having)) : ''), $select);
-            $select = str_replace('[orderBy]', (count($this->orderBy) > 0 ? implode(' ', $this->mountOrderBy($this->orderBy)) : ''), $select);
-            $select = str_replace('[orderByWithRollup]', ($this->orderByWithRollup == true ? 'WITH ROLLUP' : ''), $select);
-            $select = str_replace('[limit]', (!empty($this->limit) ? 'LIMIT ' . $this->limit : ''), $select);
-            $select = str_replace('[offset]', (!empty($this->offset) ? 'OFFSET ' . $this->offset : ''), $select);
-
-            return $select;
-        }
-
-        
+        }        
     }
 }
