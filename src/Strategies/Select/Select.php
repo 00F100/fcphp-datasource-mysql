@@ -2,6 +2,7 @@
 
 namespace FcPhp\Datasource\MySQL\Strategies\Select
 {
+    use FcPhp\Datasource\Interfaces\IStrategy;
     use FcPhp\Datasource\MySQL\Interfaces\Strategies\Select\ISelect;
 
     class Select implements ISelect
@@ -30,6 +31,17 @@ namespace FcPhp\Datasource\MySQL\Strategies\Select
         protected $orderByWithRollup;
         protected $limit;
         protected $offset;
+        protected $strategy;
+
+        public function __construct(IStrategy $strategy)
+        {
+            $this->strategy = $strategy;
+        }
+
+        public function getCriteria()
+        {
+            return $this->strategy->getCriteria();
+        }
 
         public function selectRule(string $rule) :ISelect
         {

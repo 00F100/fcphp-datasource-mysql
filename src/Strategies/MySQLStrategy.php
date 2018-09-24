@@ -59,7 +59,8 @@ namespace FcPhp\Datasource\MySQL\Strategies
         public function __construct(string $criteria, IFactory $factory, IMySQLFactory $mySQLFactory)
         {
             $this->mySQLFactory = $mySQLFactory;
-            parent::__construct($criteria, $factory);
+            $this->mySQLFactory->setStrategy($this);
+            return parent::__construct($criteria, $factory);
         }
 
         public function __call(string $method, array $args)

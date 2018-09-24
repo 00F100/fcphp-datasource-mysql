@@ -114,84 +114,92 @@ class MySQLStrategyIntegrationTest extends TestCase
     {
         $sizeResult = $this->instance->select('t.field')->sizeResult('SQL_BUFFER_RESULT');
         $this->assertInstanceOf(ISelect::class, $sizeResult);
-        d($sizeResult->getSQL().'"', true);
         $this->assertEquals('SELECT SQL_BUFFER_RESULT t.field FROM  AS ', $sizeResult->getSQL());
     }
 
-    // public function testNoCache()
-    // {
-    //     $noCache = $this->instance->noCache(true);
-    //     $this->assertInstanceOf(IStrategy::class, $noCache);
-    //     $this->assertEquals('SELECT     SQL_NO_CACHE  FROM  AS           ', $noCache->getSQL());
-    // }
+    public function testNoCache()
+    {
+        $noCache = $this->instance->select('t.field')->noCache(true);
+        $this->assertInstanceOf(ISelect::class, $noCache);
+        $this->assertEquals('SELECT SQL_NO_CACHE t.field FROM  AS ', $noCache->getSQL());
+    }
 
-    // public function testSelectOne()
-    // {
-    //     $select = $this->instance->select('t.field');
-    //     $this->assertInstanceOf(IStrategy::class, $select);
-    //     $this->assertEquals('SELECT      t.field FROM  AS           ', $select->getSQL());
-    // }
+    public function testCalcFoundRows()
+    {
+        $calcFoundRows = $this->instance->select('t.field')->sqlCalcFoundRows(true);
+        $this->assertInstanceOf(ISelect::class, $calcFoundRows);
+        $this->assertEquals('SELECT SQL_CALC_FOUND_ROWS t.field FROM  AS ', $calcFoundRows->getSQL());
+    }
 
-    // public function testSelectMulti()
-    // {
-    //     $select = $this->instance->select(['t.field', 't.field2']);
-    //     $this->assertInstanceOf(IStrategy::class, $select);
-    //     $this->assertEquals('SELECT      t.field,t.field2 FROM  AS           ', $select->getSQL());
-    // }
+    public function testSelectOne()
+    {
+        $select = $this->instance->select('t.field');
+        $this->assertInstanceOf(ISelect::class, $select);
+        $this->assertEquals('SELECT t.field FROM  AS ', $select->getSQL());
+    }
 
-    // public function testFrom()
-    // {
-    //     $from = $this->instance->from('table', 't');
-    //     $this->assertInstanceOf(IStrategy::class, $from);
-    //     $this->assertEquals('SELECT       FROM table AS t          ', $from->getSQL());
-    // }
+    public function testSelectMulti()
+    {
+        $select = $this->instance->select(['t.field', 't.field2']);
+        $this->assertInstanceOf(ISelect::class, $select);
+        $this->assertEquals('SELECT t.field,t.field2 FROM  AS ', $select->getSQL());
+    }
 
-    // public function testJoinLeft()
-    // {
-    //     $join = $this->instance->join('LEFT', ['t' => 'table'], function(ICriteria $criteria) {
-    //         $criteria->condition('t.field', '=', 't2.field', true);
-    //     });
-    //     $this->assertInstanceOf(IStrategy::class, $join);
-    //     $this->assertEquals('SELECT       FROM  AS  LEFT JOIN (table AS t) ON (( t.field = t2.field ))         ', $join->getSQL());
-    // }
+    public function testFrom()
+    {
+        $from = $this->instance->select('t.field')->from('table', 't');
+        $this->assertInstanceOf(ISelect::class, $from);
+        $this->assertEquals('SELECT t.field FROM table AS t', $from->getSQL());
+    }
 
-    // public function testJoinRight()
-    // {
-    //     $join = $this->instance->join('RIGHT', ['t' => 'table'], function(ICriteria $criteria) {
-    //         $criteria->condition('t.field', '=', 't2.field', true);
-    //     });
-    //     $this->assertInstanceOf(IStrategy::class, $join);
-    //     $this->assertEquals('SELECT       FROM  AS  RIGHT JOIN (table AS t) ON (( t.field = t2.field ))         ', $join->getSQL());
-    // }
+    public function testJoinLeft()
+    {
+        $join = $this->instance->select('t.field')->join('LEFT', ['t' => 'table'], function(ICriteria $criteria) {
+            $criteria->condition('t.field', '=', 't2.field', true);
+        });
+        $this->assertInstanceOf(ISelect::class, $join);
+        $this->assertEquals('SELECT t.field FROM  AS  LEFT JOIN (table AS t) ON (( t.field = t2.field ))', $join->getSQL());
+    }
 
-    // public function testJoinInner()
-    // {
-    //     $join = $this->instance->join('INNER', ['t' => 'table'], function(ICriteria $criteria) {
-    //         $criteria->condition('t.field', '=', 't2.field', true);
-    //     });
-    //     $this->assertInstanceOf(IStrategy::class, $join);
-    //     $this->assertEquals('SELECT       FROM  AS  INNER JOIN (table AS t) ON (( t.field = t2.field ))         ', $join->getSQL());
-    // }
+    public function testJoinRight()
+    {
+        $join = $this->instance->select('t.field')->join('RIGHT', ['t' => 'table'], function(ICriteria $criteria) {
+            $criteria->condition('t.field', '=', 't2.field', true);
+        });
+        $this->assertInstanceOf(ISelect::class, $join);
+        $this->assertEquals('SELECT t.field FROM  AS  RIGHT JOIN (table AS t) ON (( t.field = t2.field ))', $join->getSQL());
+    }
 
-    // public function testJoinInnerWhere()
-    // {
-    //     $join = $this->instance->join('INNER', ['t' => 'table'], function(ICriteria $criteria) {
-    //         $criteria->condition('t.field', '=', 't2.field', true);
-    //         $criteria->condition('t.field2', '=', 't2.field2', true);
-    //     });
-    //     $this->assertInstanceOf(IStrategy::class, $join);
-    //     $this->assertEquals('SELECT       FROM  AS  INNER JOIN (table AS t) ON (( t.field = t2.field AND t.field2 = t2.field2 ))         ', $join->getSQL());
-    // }
+    public function testJoinInner()
+    {
+        $join = $this->instance->select('t.field')->join('INNER', ['t' => 'table'], function(ICriteria $criteria) {
+            $criteria->condition('t.field', '=', 't2.field', true);
+        });
+        $this->assertInstanceOf(ISelect::class, $join);
+        $this->assertEquals('SELECT t.field FROM  AS  INNER JOIN (table AS t) ON (( t.field = t2.field ))', $join->getSQL());
+    }
 
-    // public function testJoinInnerMultiTable()
-    // {
-    //     $join = $this->instance->join('INNER', ['t' => 'table', 't2' => 'table2'], function(ICriteria $criteria) {
-    //         $criteria->condition('t.field', '=', 't2.field', true);
-    //         $criteria->condition('t.field2', '=', 't2.field2', true);
-    //     });
-    //     $this->assertInstanceOf(IStrategy::class, $join);
-    //     $this->assertEquals('SELECT       FROM  AS  INNER JOIN (table AS t,table2 AS t2) ON (( t.field = t2.field AND t.field2 = t2.field2 ))         ', $join->getSQL());
-    // }
+    public function testJoinInnerWhere()
+    {
+        $join = $this->instance->select('t.field')->join('INNER', ['t' => 'table'], function(ICriteria $criteria) {
+            $criteria->or(function(ICriteria $criteria) {
+                $criteria->condition('t.field', '=', 't2.field', true);
+                $criteria->condition('t.field2', '=', 't2.field2', true);
+            });
+        });
+        $this->assertInstanceOf(ISelect::class, $join);
+        $this->assertEquals('SELECT t.field FROM  AS  INNER JOIN (table AS t) ON (( ( t.field = t2.field OR t.field2 = t2.field2 ) ))', $join->getSQL());
+    }
+
+    public function testJoinInnerMultiTable()
+    {
+        $join = $this->instance->select('t.field')->join('INNER', ['t' => 'table', 't2' => 'table2'], function(ICriteria $criteria) {
+            $criteria->condition('t.field', '=', 't2.field', true);
+            $criteria->condition('t.field2', '=', 't2.field2', true);
+        });
+        $this->assertInstanceOf(ISelect::class, $join);
+        $this->assertEquals('SELECT t.field FROM  AS  INNER JOIN (table AS t,table2 AS t2) ON (( t.field = t2.field AND t.field2 = t2.field2 ))', $join->getSQL());
+    }
 
     // public function testJoinOuter()
     // {
