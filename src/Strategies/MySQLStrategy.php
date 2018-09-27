@@ -8,6 +8,7 @@ namespace FcPhp\Datasource\MySQL\Strategies
     use FcPhp\Datasource\MySQL\Interfaces\IMySQLStrategy;
     use FcPhp\Datasource\MySQL\Interfaces\IMySQLFactory;
     use FcPhp\Datasource\MySQL\Exceptions\InvalidJoinTypeException;
+    use FcPhp\Datasource\MySQL\Exceptions\InvalidMethodException;
 
     class MySQLStrategy extends Strategy implements IStrategy, IMySQLStrategy
     {
@@ -70,6 +71,8 @@ namespace FcPhp\Datasource\MySQL\Strategies
                 $instance = $this->mySQLFactory->get($method);
                 return call_user_func_array([$instance, $method], $args);
             }
+            throw new InvalidMethodException();
+            
         }        
     }
 }

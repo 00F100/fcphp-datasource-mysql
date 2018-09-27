@@ -4,11 +4,11 @@ namespace FcPhp\Datasource\MySQL\Strategies\Select
 {
     use FcPhp\Datasource\Interfaces\IStrategy;
     use FcPhp\Datasource\MySQL\Interfaces\Strategies\Select\ISelect;
+    use FcPhp\Datasource\MySQL\Exceptions\InvalidJoinTypeException;
 
     class Select implements ISelect
     {
         protected $selectInstruction = 'SELECT%s FROM%s';
-        // protected $selectInstruction = 'SELECT [selectRule] [highPriority] [straightJoin] [sizeResult] [noCache] [sqlCalcFoundRows] [select] FROM [table] AS [tableAlias] [join] [where] [groupBy] [groupByWithRollup] [having] [orderBy] [orderByWithRollup] [limit] [offset] ';
 
         protected $selectRule;
         protected $selectRules = ['ALL', 'DISTINCT', 'DISTINCTROW'];
@@ -116,9 +116,9 @@ namespace FcPhp\Datasource\MySQL\Strategies\Select
             return $this;
         }
 
-        public function groupBy(string $field) :ISelect
+        public function groupBy($fields) :ISelect
         {
-            $this->groupBy[] = $field;
+            $this->groupBy[] = $fields;
             return $this;
         }
 
@@ -223,9 +223,11 @@ namespace FcPhp\Datasource\MySQL\Strategies\Select
             return implode(' ', $condition);
         }
 
-        private function mountGroupBy(array $groupBy)
+        private function mountGroupBy($groupBy)
         {
-            return $groupBy;
+            if(count($this->groupBy) > 0) {
+                return 'GROUP BY ' . implode(',', $this->groupBy);
+            }
         }
 
         private function mountHaving(array $having)
@@ -258,7 +260,7 @@ namespace FcPhp\Datasource\MySQL\Strategies\Select
                 ' ' . $this->table . ' AS ' . $this->tableAlias,
                 (count($this->join) > 0 ? ' ' . implode(' ', $this->mountJoin($this->join)) : ''),
                 (count($this->where) > 0 ? ' WHERE ' . $this->mountWhere($this->where) : ''),
-                (count($this->groupBy) > 0 ? ' ' . implode(' ', $this->mountGroupBy($this->groupBy)) : ''),
+                $this->mountGroupBy($this->groupBy),
                 ($this->groupByWithRollup == true ? ' WITH ROLLUP' : ''),
                 (count($this->having) > 0 ? ' ' . implode(' ', $this->mountHaving($this->having)) : ''),
                 (count($this->orderBy) > 0 ? ' ' . implode(' ', $this->mountOrderBy($this->orderBy)) : ''),
