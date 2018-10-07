@@ -3,46 +3,154 @@
 namespace FcPhp\Datasource\MySQL\Strategies\Select
 {
     use FcPhp\Datasource\Interfaces\IStrategy;
+    use FcPhp\Datasource\Interfaces\ICriteria;
     use FcPhp\Datasource\MySQL\Interfaces\Strategies\Select\ISelect;
     use FcPhp\Datasource\MySQL\Exceptions\InvalidJoinTypeException;
 
     class Select implements ISelect
     {
+        /**
+         * @var string Select instruction
+         */
         protected $selectInstruction = 'SELECT%s FROM%s';
 
+        /**
+         * @var string Select Rule
+         */
         protected $selectRule;
+
+        /**
+         * @var array List of Select Rule Enable
+         */
         protected $selectRules = ['ALL', 'DISTINCT', 'DISTINCTROW'];
+
+        /**
+         * @var bool is High Priority
+         */
         protected $highPriority;
+
+        /**
+         * @var bool is Straight Join
+         */
         protected $straightJoin;
+
+        /**
+         * @var array Size Result
+         */
         protected $sizeResult = [];
+
+        /**
+         * @var array list of enable Size Result
+         */
         protected $sizeResults = ['SQL_SMALL_RESULT', 'SQL_BIG_RESULT', 'SQL_BUFFER_RESULT'];
+
+        /**
+         * @var bool if use MySQL cache
+         */
         protected $noCache;
+
+        /**
+         * @var bool count records
+         */
         protected $sqlCalcFoundRows;
+
+        /**
+         * @var array list of fields to Select
+         */
         protected $select = [];
+
+        /**
+         * @var string Table to select
+         */
         protected $table;
+
+        /**
+         * @var string Table alias
+         */
         protected $tableAlias;
+
+        /**
+         * @var array Joins on Tables
+         */
         protected $join = [];
+
+        /**
+         * @var array Joins enabled
+         */
         protected $joins = ['LEFT', 'RIGHT', 'INNER', 'OUTER', 'NATURAL', 'STRAIGHT'];
+
+        /**
+         * @var array conditions on Where clouse
+         */
         protected $where = [];
+
+        /**
+         * @var array Group By fields
+         */
         protected $groupBy = [];
+
+        /**
+         * @var bool Group By with Rollup
+         */
         protected $groupByWithRollup;
+
+        /**
+         * @var array fields to Having
+         */
         protected $having = [];
+
+        /**
+         * @var array Order By fields
+         */
         protected $orderBy = [];
+
+        /**
+         * @var bool Order By with Rollup
+         */
         protected $orderByWithRollup;
+
+        /**
+         * @var int Limit of records
+         */
         protected $limit;
+
+        /**
+         * @var int Offset of records
+         */
         protected $offset;
+
+        /**
+         * @var FcPhp\Datasource\Interfaces\IStrategy
+         */
         protected $strategy;
 
+        /**
+         * Method to construct instance
+         *
+         * @param FcPhp\Datasource\Interfaces\IStrategy
+         * @return void
+         */
         public function __construct(IStrategy $strategy)
         {
             $this->strategy = $strategy;
         }
 
-        public function getCriteria()
+        /**
+         * Method to return instance of Criteria
+         *
+         * @return FcPhp\Datasource\Interfaces\ICriteria
+         */
+        public function getCriteria() :ICriteria
         {
             return $this->strategy->getCriteria();
         }
 
+        /**
+         * Method to configure Select Rule
+         *
+         * @param string $rule Rule to use
+         * @return FcPhp\Datasource\MySQL\Interfaces\Strategies\Select\ISelect
+         */
         public function selectRule(string $rule) :ISelect
         {
             if(in_array($rule, $this->selectRules)) {
@@ -51,18 +159,36 @@ namespace FcPhp\Datasource\MySQL\Strategies\Select
             return $this;
         }
 
+        /**
+         * Method to define High Priority
+         *
+         * @param bool $highPriority define true or false
+         * @return FcPhp\Datasource\MySQL\Interfaces\Strategies\Select\ISelect
+         */
         public function highPriority(bool $highPriority) :ISelect
         {
             $this->highPriority = $highPriority;
             return $this;
         }
 
+        /**
+         * Method to define Straight Join
+         *
+         * @param bool $straightJoin define true or false
+         * @return FcPhp\Datasource\MySQL\Interfaces\Strategies\Select\ISelect
+         */
         public function straightJoin(bool $straightJoin) :ISelect
         {
             $this->straightJoin = $straightJoin;
             return $this;
         }
 
+        /**
+         * Method to define size result
+         *
+         * @param string $size Configure Size Result
+         * @return FcPhp\Datasource\MySQL\Interfaces\Strategies\Select\ISelect
+         */
         public function sizeResult(string $size) :ISelect
         {
             if(in_array($size, $this->sizeResults)) {
@@ -71,18 +197,36 @@ namespace FcPhp\Datasource\MySQL\Strategies\Select
             return $this;
         }
 
+        /**
+         * Method to configure to (non) use cache
+         *
+         * @param bool $noCache define true or false
+         * @return FcPhp\Datasource\MySQL\Interfaces\Strategies\Select\ISelect
+         */
         public function noCache(bool $noCache) :ISelect
         {
             $this->noCache = $noCache;
             return $this;
         }
 
+        /**
+         * Method to calc rows of records
+         *
+         * @param bool $sqlCalcFoundRows configure to return calc of records
+         * @return FcPhp\Datasource\MySQL\Interfaces\Strategies\Select\ISelect
+         */
         public function sqlCalcFoundRows(bool $sqlCalcFoundRows) :ISelect
         {
             $this->sqlCalcFoundRows = $sqlCalcFoundRows;
             return $this;
         }
 
+        /**
+         * Method to confire fields to select
+         *
+         * @param string|array $fields Field(s) to select
+         * @return FcPhp\Datasource\MySQL\Interfaces\Strategies\Select\ISelect
+         */
         public function select($fields) :ISelect
         {
             if(!is_array($fields)) {
@@ -92,6 +236,13 @@ namespace FcPhp\Datasource\MySQL\Strategies\Select
             return $this;
         }
 
+        /**
+         * Method to define table of select
+         *
+         * @param string $table name of Table
+         * @param string $alias alias of Table
+         * @return FcPhp\Datasource\MySQL\Interfaces\Strategies\Select\ISelect
+         */
         public function from(string $table, string $alias) :ISelect
         {
             $this->table = $table;
@@ -99,6 +250,16 @@ namespace FcPhp\Datasource\MySQL\Strategies\Select
             return $this;
         }
 
+        /**
+         * Method to define many joins
+         *
+         * @param string $joinType type of Join
+         * @param array $tables Tables to use
+         * @param object $condition callback to use Criteria on condition
+         * @param array $using
+         * @param bool $crossJoin
+         * @return FcPhp\Datasource\MySQL\Interfaces\Strategies\Select\ISelect
+         */
         public function join(string $joinType, array $tables, object $condition, array $using = [], bool $crossJoin = false) :ISelect
         {
             if(in_array($joinType, $this->joins)) {
@@ -108,6 +269,12 @@ namespace FcPhp\Datasource\MySQL\Strategies\Select
             throw new InvalidJoinTypeException();
         }
 
+        /**
+         * Method to define Where conditions
+         * 
+         * @param object $callback callback to configure conditions
+         * @return FcPhp\Datasource\MySQL\Interfaces\Strategies\Select\ISelect
+         */
         public function where(object $callback) :ISelect
         {
             $criteria = $this->getCriteria();
@@ -116,49 +283,129 @@ namespace FcPhp\Datasource\MySQL\Strategies\Select
             return $this;
         }
 
+        /**
+         * Method to configure group by 
+         * 
+         * @param array|string $fields fields to group
+         * @return FcPhp\Datasource\MySQL\Interfaces\Strategies\Select\ISelect
+         */
         public function groupBy($fields) :ISelect
         {
             $this->groupBy[] = $fields;
             return $this;
         }
 
+        /**
+         * Method to configure Group By with Rollup
+         * 
+         * @param bool $groupByWithRollup
+         * @return FcPhp\Datasource\MySQL\Interfaces\Strategies\Select\ISelect
+         */
         public function groupByWithRollup(bool $groupByWithRollup) :ISelect
         {
             $this->groupByWithRollup = $groupByWithRollup;
             return $this;
         }
 
-        public function having(string $field, string $condition, string $value) :ISelect
+        /**
+         * Method to configure conditions into Havind
+         * 
+         * @param object $callback
+         * @return FcPhp\Datasource\MySQL\Interfaces\Strategies\Select\ISelect
+         */
+        public function having(object $callback) :ISelect
         {
-            $this->having[] = compact('field', 'condition', 'value');
+            $this->having = $callback;
             return $this;
         }
 
-        public function orderBy(string $field, string $order) :ISelect
+        /**
+         * Method to order records
+         * 
+         * @param array|string $field Field(s) to order
+         * @param string $order Order of records
+         * @return FcPhp\Datasource\MySQL\Interfaces\Strategies\Select\ISelect
+         */
+        public function orderBy($field, string $order = 'ASC') :ISelect
         {
-            $this->orderBy[] = compact('field', 'order');
+            if(is_string($field)) {
+                $field = [$field => $order];
+            }
+            $this->orderBy[] = $field;
             return $this;
         }
 
+        /**
+         * Method to configure order use with rollup
+         * 
+         * @param bool $orderByWithRollup
+         * @return FcPhp\Datasource\MySQL\Interfaces\Strategies\Select\ISelect
+         */
         public function orderByWithRollup(bool $orderByWithRollup) :ISelect
         {
             $this->orderByWithRollup = $orderByWithRollup;
             return $this;
         }
 
+        /**
+         *  Method to set limit of records
+         * 
+         * @param int $limit
+         * @return FcPhp\Datasource\MySQL\Interfaces\Strategies\Select\ISelect
+         */
         public function limit(int $limit) :ISelect
         {
             $this->limit = $limit;
             return $this;
         }
 
+        /**
+         * Method to define offset of records
+         * 
+         * @param int $offset
+         * @return FcPhp\Datasource\MySQL\Interfaces\Strategies\Select\ISelect
+         */
         public function offset(int $offset) :ISelect
         {
             $this->offset = $offset;
             return $this;
         }
 
-        private function mountJoin(array $joins)
+        /**
+         * Method to return SQL
+         * 
+         * @return string
+         */
+        public function getSQL() :string
+        {
+            return sprintf($this->selectInstruction, implode('', [
+                (!empty($this->selectRule) ? ' ' . $this->selectRule : '') .
+                ($this->highPriority == true ? ' HIGH_PRIORITY' : '') .
+                ($this->straightJoin == true ? ' STRAIGHT_JOIN' : '') .
+                (count($this->sizeResult) > 0 ? ' ' . implode(' ', $this->sizeResult) : '') .
+                ($this->noCache == true ? ' SQL_NO_CACHE' : '') .
+                ($this->sqlCalcFoundRows == true ? ' SQL_CALC_FOUND_ROWS' : '') .
+                ' ' . implode(',', $this->select)
+            ]), implode('', [
+                ' ' . $this->table . ' AS ' . $this->tableAlias,
+                (count($this->join) > 0 ? ' ' . $this->mountJoin($this->join) : ''),
+                (count($this->where) > 0 ? ' WHERE ' . $this->mountWhere($this->where) : ''),
+                count($this->groupBy) > 0 ? $this->mountGroupBy($this->groupBy) : '',
+                ($this->groupByWithRollup == true ? ' WITH ROLLUP' : ''),
+                (is_object($this->having) > 0 ? ' ' . $this->mountHaving($this->having) : ''),
+                (count($this->orderBy) > 0 ? ' ' . $this->mountOrderBy($this->orderBy) : ''),
+                ($this->orderByWithRollup == true ? ' WITH ROLLUP' : ''),
+                (!empty($this->limit) ? ' LIMIT ' . $this->limit : ''),
+                (!empty($this->offset) ? ' OFFSET ' . $this->offset : '')
+            ]));
+        }
+
+        /**
+         * Method to mount Join
+         * 
+         * @return string
+         */
+        private function mountJoin(array $joins) :string
         {
             if(count($joins)) {
                 foreach($joins as $index => $join) {
@@ -169,10 +416,15 @@ namespace FcPhp\Datasource\MySQL\Strategies\Select
                         ->getWhere()) . ')';
                 }
             }
-            return $joins;
+            return implode(' ', $joins);
         }
 
-        private function mountJoinType(string $joinType)
+        /**
+         * Method to mount Join Type
+         * 
+         * @return string
+         */
+        private function mountJoinType(string $joinType) :string
         {
             if($joinType == 'STRAIGHT') {
                 return $joinType . '_JOIN';
@@ -180,20 +432,27 @@ namespace FcPhp\Datasource\MySQL\Strategies\Select
             return $joinType. ' JOIN';
         }
 
-        private function mountJoinTable($tables)
+        /**
+         * Method to return Join Table
+         * 
+         * @return string
+         */
+        private function mountJoinTable(array $tables) :string
         {
-            if(is_array($tables)) {
-                foreach($tables as $index => $table) {
-                    if(!is_int($index)) {
-                        $tables[$index] .= ' AS ' . $index;
-                    }
+            foreach($tables as $index => $table) {
+                if(!is_int($index)) {
+                    $tables[$index] .= ' AS ' . $index;
                 }
-                return '(' . implode(',', $tables) . ')';
             }
-            return $tables;
+            return '(' . implode(',', $tables) . ')';
         }
 
-        private function mountWhere(array $where, string $argCondition = 'AND')
+        /**
+         * Method to return where conditions
+         * 
+         * @return string
+         */
+        private function mountWhere(array $where, string $argCondition = 'AND') :string
         {
             $parentCondition = $argCondition;
             $condition = [];
@@ -223,74 +482,44 @@ namespace FcPhp\Datasource\MySQL\Strategies\Select
             return implode(' ', $condition);
         }
 
-        private function mountGroupBy($groupBy)
+        /**
+         * Method to mount Group By
+         * 
+         * @return string
+         */
+        private function mountGroupBy($groupBy) :string
         {
-            if(count($this->groupBy) > 0) {
-                return 'GROUP BY ' . implode(',', $this->groupBy);
+            return 'GROUP BY ' . implode(',', $this->groupBy);
+        }
+
+        /**
+         * Method to mount Having
+         * 
+         * @return string
+         */
+        private function mountHaving(object $callback) :string
+        {
+            $criteria = $this->getCriteria();
+            $callback($criteria);
+            return 'HAVING ' . $this->mountWhere($criteria->getWhere());
+        }
+
+        /**
+         * Method to mount Order By
+         * 
+         * @return string
+         */
+        private function mountOrderBy(array $orderBy) :string
+        {
+            $orders = [];
+            $ordersToSql = [];
+            foreach($orderBy as $order) {
+                $orders = array_merge($orders, $order);
             }
-        }
-
-        private function mountHaving(array $having)
-        {
-            return $having;
-        }
-
-        private function mountOrderBy(array $orderBy)
-        {
-            return $orderBy;
-        }
-
-        public function getSQL()
-        {
-
-        // protected $selectInstruction = 'SELECT [selectRule] [highPriority] [straightJoin] [sizeResult] [noCache] [sqlCalcFoundRows] [select] FROM [table] AS [tableAlias] [join] [where] [groupBy] [groupByWithRollup] [having] [orderBy] [orderByWithRollup] [limit] [offset] ';
-
-            // protected $selectInstruction = 'SELECT %s FROM %s';
-// d($this->select, true);
-
-            return sprintf($this->selectInstruction, implode('', [
-                (!empty($this->selectRule) ? ' ' . $this->selectRule : '') .
-                ($this->highPriority == true ? ' HIGH_PRIORITY' : '') .
-                ($this->straightJoin == true ? ' STRAIGHT_JOIN' : '') .
-                (count($this->sizeResult) > 0 ? ' ' . implode(' ', $this->sizeResult) : '') .
-                ($this->noCache == true ? ' SQL_NO_CACHE' : '') .
-                ($this->sqlCalcFoundRows == true ? ' SQL_CALC_FOUND_ROWS' : '') .
-                ' ' . implode(',', $this->select)
-            ]), implode('', [
-                ' ' . $this->table . ' AS ' . $this->tableAlias,
-                (count($this->join) > 0 ? ' ' . implode(' ', $this->mountJoin($this->join)) : ''),
-                (count($this->where) > 0 ? ' WHERE ' . $this->mountWhere($this->where) : ''),
-                $this->mountGroupBy($this->groupBy),
-                ($this->groupByWithRollup == true ? ' WITH ROLLUP' : ''),
-                (count($this->having) > 0 ? ' ' . implode(' ', $this->mountHaving($this->having)) : ''),
-                (count($this->orderBy) > 0 ? ' ' . implode(' ', $this->mountOrderBy($this->orderBy)) : ''),
-                ($this->orderByWithRollup == true ? ' WITH ROLLUP' : ''),
-                (!empty($this->limit) ? ' LIMIT ' . $this->limit : ''),
-                (!empty($this->offset) ? ' OFFSET ' . $this->offset : '')
-            ]));
-
-            // $select = $this->selectInstruction;
-            // $select .= str_replace('[selectRule]', (!empty($this->selectRule) ? $this->selectRule : ''), $select);
-            // $select = str_replace('[selectRule]', (!empty($this->selectRule) ? $this->selectRule : ''), $select);
-            // $select = str_replace('[highPriority]', ($this->highPriority == true ? 'HIGH_PRIORITY' : ''), $select);
-            // $select = str_replace('[straightJoin]', ($this->straightJoin == true ? 'STRAIGHT_JOIN' : ''), $select);
-            // $select = str_replace('[sizeResult]', (count($this->sizeResult) > 0 ? implode(' ', $this->sizeResult) : ''), $select);
-            // $select = str_replace('[noCache]', ($this->noCache == true ? 'SQL_NO_CACHE' : ''), $select);
-            // $select = str_replace('[sqlCalcFoundRows]', ($this->sqlCalcFoundRows == true ? 'SQL_CALC_FOUND_ROWS' : ''), $select);
-            // $select = str_replace('[select]', implode(',', $this->select), $select);
-            // $select = str_replace('[table]', $this->table, $select);
-            // $select = str_replace('[tableAlias]', $this->tableAlias, $select);
-            // $select = str_replace('[join]', (count($this->join) > 0 ? implode(' ', $this->mountJoin($this->join)) : ''), $select);
-            // $select = str_replace('[where]', (count($this->where) > 0 ? 'WHERE ' . $this->mountWhere($this->where) : ''), $select);
-            // $select = str_replace('[groupBy]', (count($this->groupBy) > 0 ? implode(' ', $this->mountGroupBy($this->groupBy)) : ''), $select);
-            // $select = str_replace('[groupByWithRollup]', ($this->groupByWithRollup == true ? 'WITH ROLLUP' : ''), $select);
-            // $select = str_replace('[having]', (count($this->having) > 0 ? implode(' ', $this->mountHaving($this->having)) : ''), $select);
-            // $select = str_replace('[orderBy]', (count($this->orderBy) > 0 ? implode(' ', $this->mountOrderBy($this->orderBy)) : ''), $select);
-            // $select = str_replace('[orderByWithRollup]', ($this->orderByWithRollup == true ? 'WITH ROLLUP' : ''), $select);
-            // $select = str_replace('[limit]', (!empty($this->limit) ? 'LIMIT ' . $this->limit : ''), $select);
-            $select = str_replace('[offset]', (!empty($this->offset) ? 'OFFSET ' . $this->offset : ''), $select);
-
-            return $select;
+            foreach($orders as $name => $order) {
+                $ordersToSql[] = $name . ' ' . $order;
+            }
+            return 'ORDER BY ' . implode(',', $ordersToSql);
         }
     }
 }

@@ -246,4 +246,57 @@ class SelectIntegrationTest extends TestCase
         $this->assertInstanceOf(ISelect::class, $groupBy);
         $this->assertEquals('SELECT t.field FROM  AS GROUP BY t.field2,t.field3', $groupBy->getSQL());
     }
+
+    public function testGroupByWithRollup()
+    {
+        $groupBy = $this->instance->select('t.field')->groupBy('t.field2')->groupBy('t.field3')->groupByWithRollup(true);
+        $this->assertInstanceOf(ISelect::class, $groupBy);
+        $this->assertEquals('SELECT t.field FROM  AS GROUP BY t.field2,t.field3 WITH ROLLUP', $groupBy->getSQL());
+    }
+
+    public function testHaving()
+    {
+        $having = $this->instance->select('t.field')->having(function(ICriteria $criteria) {
+            $criteria->and(function(ICriteria $criteria) {
+                $criteria->condition('SUM(t.field)', '>', 0);
+            });
+        });
+        $this->assertInstanceOf(ISelect::class, $having);
+        $this->assertEquals('SELECT t.field FROM  AS  HAVING ( ( SUM(t.field) > 0 ) )', $having->getSQL());
+    }
+
+    public function testOrderNonArray()
+    {
+        $order = $this->instance->select('t.field')->orderBy('t.field4', 'DESC');
+        $this->assertInstanceOf(ISelect::class, $order);
+        $this->assertEquals('SELECT t.field FROM  AS  ORDER BY t.field4 DESC', $order->getSQL());
+    }
+
+    public function testOrderByArray()
+    {
+        $order = $this->instance->select('t.field')->orderBy(['t.field' => 'DESC', 't.field2' => 'ASC'])->orderBy('t.field3')->orderBy('t.field4', 'DESC');
+        $this->assertInstanceOf(ISelect::class, $order);
+        $this->assertEquals('SELECT t.field FROM  AS  ORDER BY t.field DESC,t.field2 ASC,t.field3 ASC,t.field4 DESC', $order->getSQL());
+    }
+
+    public function testOrderByWithRollup()
+    {
+        $order = $this->instance->select('t.field')->orderBy('t.field4', 'DESC')->orderByWithRollup(true);
+        $this->assertInstanceOf(ISelect::class, $order);
+        $this->assertEquals('SELECT t.field FROM  AS  ORDER BY t.field4 DESC WITH ROLLUP', $order->getSQL());
+    }
+
+    public function testLimit()
+    {
+        $limit = $this->instance->select('t.field')->limit(10);
+        $this->assertInstanceOf(ISelect::class, $limit);
+        $this->assertEquals('SELECT t.field FROM  AS  LIMIT 10', $limit->getSQL());
+    }
+
+    public function testOffset()
+    {
+        $offset = $this->instance->select('t.field')->offset(20);
+        $this->assertInstanceOf(ISelect::class, $offset);
+        $this->assertEquals('SELECT t.field FROM  AS  OFFSET 20', $offset->getSQL());
+    }
 }
