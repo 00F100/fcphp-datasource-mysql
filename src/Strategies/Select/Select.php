@@ -124,6 +124,8 @@ namespace FcPhp\Datasource\MySQL\Strategies\Select
          */
         protected $strategy;
 
+        protected $tablesInQuery = [];
+
         /**
          * Method to construct instance
          *
@@ -227,9 +229,52 @@ namespace FcPhp\Datasource\MySQL\Strategies\Select
          * @param string|array $fields Field(s) to select
          * @return FcPhp\Datasource\MySQL\Interfaces\Strategies\Select\ISelect
          */
-        public function select($fields) :ISelect
+        public function select($fields, string $alias = null) :ISelect
         {
+            if(is_array($fields)) {
+                $newFields = [];
+                foreach($fields as $alias => $field) {
+                    if($field instanceof ISelect) {
+                        $tablesInQuery = $field->getTablesInQuery();
+                        if(count($tablesInQuery) > 0) {
+                            foreach($tablesInQuery as $table) {
+                                if(!in_array($table, $this->tablesInQuery)) {
+                                    $this->tablesInQuery[] = $table;
+                                }
+                            }
+                        }
+                        $fieldSQL = '(' . $field->getSQL() . ')';
+                        if(!is_int($alias)) {
+                            $fieldSQL .= ' AS ' . $alias;
+                        }
+                        $newFields[] = $fieldSQL;
+                    }else{
+                        $fieldSQL = $field;
+                        if(!is_int($alias)) {
+                            $fieldSQL .= ' AS ' . $alias;
+                        }
+                        $newFields[] = $fieldSQL;
+                    }
+                }
+                if(count($newFields) > 0) {
+                    $fields = $newFields;
+                }
+            }
             if(!is_array($fields)) {
+                if($fields instanceof ISelect) {
+                    $tablesInQuery = $fields->getTablesInQuery();
+                    if(count($tablesInQuery) > 0) {
+                        foreach($tablesInQuery as $table) {
+                            if(!in_array($table, $this->tablesInQuery)) {
+                                $this->tablesInQuery[] = $table;
+                            }
+                        }
+                    }
+                    $fields = '(' . $fields->getSQL() . ')';
+                }
+                if(!empty($alias)) {
+                    $fields .= ' AS ' . $alias;
+                }
                 $fields = [$fields];
             }
             $this->select = $fields;
@@ -247,6 +292,9 @@ namespace FcPhp\Datasource\MySQL\Strategies\Select
         {
             $this->table = $table;
             $this->tableAlias = $alias;
+            if(!in_array($table, $this->tablesInQuery)) {
+                $this->tablesInQuery[] = $table;
+            }
             return $this;
         }
 
@@ -264,6 +312,12 @@ namespace FcPhp\Datasource\MySQL\Strategies\Select
         {
             if(in_array($joinType, $this->joins)) {
                 $this->join[] = compact('joinType', 'tables', 'condition', 'using', 'crossJoin');
+                foreach($tables as $table) {
+                    if(!in_array($table, $this->tablesInQuery)) {
+                        $this->tablesInQuery[] = $table;
+                    }
+                }
+                
                 return $this;
             }
             throw new InvalidJoinTypeException();
@@ -280,6 +334,14 @@ namespace FcPhp\Datasource\MySQL\Strategies\Select
             $criteria = $this->getCriteria();
             $callback($criteria);
             $this->where = array_merge($this->where, $criteria->getWhere());
+            $tablesInQuery = $criteria->getTablesInQuery();
+            if(count($tablesInQuery) > 0) {
+                foreach($tablesInQuery as $table) {
+                    if(!in_array($table, $this->tablesInQuery)) {
+                        $this->tablesInQuery[] = $table;
+                    }
+                }
+            }
             return $this;
         }
 
@@ -398,6 +460,11 @@ namespace FcPhp\Datasource\MySQL\Strategies\Select
                 (!empty($this->limit) ? ' LIMIT ' . $this->limit : ''),
                 (!empty($this->offset) ? ' OFFSET ' . $this->offset : '')
             ]));
+        }
+
+        public function getTablesInQuery()
+        {
+            return $this->tablesInQuery;
         }
 
         /**

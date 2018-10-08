@@ -124,6 +124,13 @@ class SelectIntegrationTest extends TestCase
         $this->assertEquals('SELECT t.field,t.field2 FROM  AS ', $select->getSQL());
     }
 
+    public function testSelectMultiWithAlias()
+    {
+        $select = $this->instance->select(['alias1' => 't.field', 'alias2' => 't.field2']);
+        $this->assertInstanceOf(ISelect::class, $select);
+        $this->assertEquals('SELECT t.field AS alias1,t.field2 AS alias2 FROM  AS ', $select->getSQL());
+    }
+
     public function testFrom()
     {
         $from = $this->instance->select('t.field')->from('table', 't');
@@ -298,5 +305,61 @@ class SelectIntegrationTest extends TestCase
         $offset = $this->instance->select('t.field')->offset(20);
         $this->assertInstanceOf(ISelect::class, $offset);
         $this->assertEquals('SELECT t.field FROM  AS  OFFSET 20', $offset->getSQL());
+    }
+
+    public function testSubQuery()
+    {
+        $subquery = (new Select($this->strategy))->select('t.field')->from('table', 't');
+        $principal = $this->instance
+            ->select('t2.field')
+            ->from('table2', 't2')
+            ->where(function(ICriteria $criteria) use ($subquery) {
+                $criteria->condition('t2.field', '=', $subquery);
+            });
+        $this->assertInstanceOf(ISelect::class, $subquery);
+        $this->assertInstanceOf(ISelect::class, $principal);
+        $this->assertEquals('SELECT t2.field FROM table2 AS t2 WHERE ( t2.field = (SELECT t.field FROM table AS t) )', $principal->getSQL());
+    }
+
+    public function testTablesInQuery()
+    {
+        $subquery = (new Select($this->strategy))->select('t.field')->from('table', 't');
+        $subquery2 = (new Select($this->strategy))->select('t4.field')->from('table4', 't4');
+        $principal = $this->instance
+            ->select($subquery2, 'item')
+            ->from('table2', 't2')
+            ->join('LEFT', ['t3' => 'table3'], function(ICriteria $criteria) {
+                $criteria->condition('t3.field', '=', 't2.field', true);
+            })
+            ->where(function(ICriteria $criteria) use ($subquery) {
+                $criteria->condition('t2.field', '=', $subquery);
+            });
+        $this->assertInstanceOf(ISelect::class, $subquery);
+        $this->assertInstanceOf(ISelect::class, $principal);
+        $this->assertEquals(['table4', 'table2', 'table3', 'table'], $principal->getTablesInQuery());
+        $this->assertEquals('SELECT (SELECT t4.field FROM table4 AS t4) AS item FROM table2 AS t2 LEFT JOIN (table3 AS t3) ON (( t3.field = t2.field )) WHERE ( t2.field = (SELECT t.field FROM table AS t) )', $principal->getSQL());
+    }
+
+    public function testTablesInQueryManySelectQuery()
+    {
+        $subquery = (new Select($this->strategy))->select('t.field')->from('table', 't');
+        $subquery2 = (new Select($this->strategy))->select('t4.field')->from('table4', 't4');
+        $subquery3 = (new Select($this->strategy))->select('t5.field')->from('table5', 't5');
+        $principal = $this->instance
+            ->select([
+                'value1' => $subquery2,
+                'value2' => $subquery3
+            ])
+            ->from('table2', 't2')
+            ->join('LEFT', ['t3' => 'table3'], function(ICriteria $criteria) {
+                $criteria->condition('t3.field', '=', 't2.field', true);
+            })
+            ->where(function(ICriteria $criteria) use ($subquery) {
+                $criteria->condition('t2.field', '=', $subquery);
+            });
+        $this->assertInstanceOf(ISelect::class, $subquery);
+        $this->assertInstanceOf(ISelect::class, $principal);
+        $this->assertEquals(['table4', 'table5', 'table2', 'table3', 'table'], $principal->getTablesInQuery());
+        $this->assertEquals('SELECT (SELECT t4.field FROM table4 AS t4) AS value1,(SELECT t5.field FROM table5 AS t5) AS value2 FROM table2 AS t2 LEFT JOIN (table3 AS t3) ON (( t3.field = t2.field )) WHERE ( t2.field = (SELECT t.field FROM table AS t) )', $principal->getSQL());
     }
 }
