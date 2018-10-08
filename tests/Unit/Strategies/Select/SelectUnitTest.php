@@ -32,7 +32,8 @@ class SelectUnitTest extends TestCase
                         'WHERE-MOCK4',
                         'WHERE-MOCK5',
                     ]
-                ]
+                ],
+                'WHERE-MOCK6'
             ]));
 
         $this->strategy = $this->createMock('FcPhp\Datasource\MySQL\Strategies\MySQLStrategy');
@@ -162,7 +163,7 @@ class SelectUnitTest extends TestCase
             $criteria->condition('t.field', '=', 't2.field', true);
         });
         $this->assertInstanceOf(ISelect::class, $join);
-        $this->assertEquals('SELECT t.field FROM  AS  LEFT JOIN (table AS t) ON (( ( WHERE-MOCK AND WHERE-MOCK2 AND ( WHERE-MOCK3 OR WHERE-MOCK4 OR WHERE-MOCK5 ) ) ))', $join->getSQL());
+        $this->assertEquals('SELECT t.field FROM  AS  LEFT JOIN (table AS t) ON (( ( WHERE-MOCK AND WHERE-MOCK2 AND ( WHERE-MOCK3 OR WHERE-MOCK4 OR WHERE-MOCK5 ) ) AND WHERE-MOCK6 ))', $join->getSQL());
     }
 
     public function testJoinRight()
@@ -171,7 +172,7 @@ class SelectUnitTest extends TestCase
             $criteria->condition('t.field', '=', 't2.field', true);
         });
         $this->assertInstanceOf(ISelect::class, $join);
-        $this->assertEquals('SELECT t.field FROM  AS  RIGHT JOIN (table AS t) ON (( ( WHERE-MOCK AND WHERE-MOCK2 AND ( WHERE-MOCK3 OR WHERE-MOCK4 OR WHERE-MOCK5 ) ) ))', $join->getSQL());
+        $this->assertEquals('SELECT t.field FROM  AS  RIGHT JOIN (table AS t) ON (( ( WHERE-MOCK AND WHERE-MOCK2 AND ( WHERE-MOCK3 OR WHERE-MOCK4 OR WHERE-MOCK5 ) ) AND WHERE-MOCK6 ))', $join->getSQL());
     }
 
     public function testJoinInner()
@@ -180,7 +181,7 @@ class SelectUnitTest extends TestCase
             $criteria->condition('t.field', '=', 't2.field', true);
         });
         $this->assertInstanceOf(ISelect::class, $join);
-        $this->assertEquals('SELECT t.field FROM  AS  INNER JOIN (table AS t) ON (( ( WHERE-MOCK AND WHERE-MOCK2 AND ( WHERE-MOCK3 OR WHERE-MOCK4 OR WHERE-MOCK5 ) ) ))', $join->getSQL());
+        $this->assertEquals('SELECT t.field FROM  AS  INNER JOIN (table AS t) ON (( ( WHERE-MOCK AND WHERE-MOCK2 AND ( WHERE-MOCK3 OR WHERE-MOCK4 OR WHERE-MOCK5 ) ) AND WHERE-MOCK6 ))', $join->getSQL());
     }
 
     public function testJoinInnerWhere()
@@ -192,7 +193,7 @@ class SelectUnitTest extends TestCase
             });
         });
         $this->assertInstanceOf(ISelect::class, $join);
-        $this->assertEquals('SELECT t.field FROM  AS  INNER JOIN (table AS t) ON (( ( WHERE-MOCK AND WHERE-MOCK2 AND ( WHERE-MOCK3 OR WHERE-MOCK4 OR WHERE-MOCK5 ) ) ))', $join->getSQL());
+        $this->assertEquals('SELECT t.field FROM  AS  INNER JOIN (table AS t) ON (( ( WHERE-MOCK AND WHERE-MOCK2 AND ( WHERE-MOCK3 OR WHERE-MOCK4 OR WHERE-MOCK5 ) ) AND WHERE-MOCK6 ))', $join->getSQL());
     }
 
     public function testJoinInnerMultiTable()
@@ -202,7 +203,7 @@ class SelectUnitTest extends TestCase
             $criteria->condition('t.field2', '=', 't2.field2', true);
         });
         $this->assertInstanceOf(ISelect::class, $join);
-        $this->assertEquals('SELECT t.field FROM  AS  INNER JOIN (table AS t,table2 AS t2) ON (( ( WHERE-MOCK AND WHERE-MOCK2 AND ( WHERE-MOCK3 OR WHERE-MOCK4 OR WHERE-MOCK5 ) ) ))', $join->getSQL());
+        $this->assertEquals('SELECT t.field FROM  AS  INNER JOIN (table AS t,table2 AS t2) ON (( ( WHERE-MOCK AND WHERE-MOCK2 AND ( WHERE-MOCK3 OR WHERE-MOCK4 OR WHERE-MOCK5 ) ) AND WHERE-MOCK6 ))', $join->getSQL());
     }
 
     public function testJoinOuter()
@@ -211,7 +212,7 @@ class SelectUnitTest extends TestCase
             $criteria->condition('t.field', '=', 't2.field', true);
         });
         $this->assertInstanceOf(ISelect::class, $join);
-        $this->assertEquals('SELECT t.field FROM  AS  OUTER JOIN (table AS t) ON (( ( WHERE-MOCK AND WHERE-MOCK2 AND ( WHERE-MOCK3 OR WHERE-MOCK4 OR WHERE-MOCK5 ) ) ))', $join->getSQL());
+        $this->assertEquals('SELECT t.field FROM  AS  OUTER JOIN (table AS t) ON (( ( WHERE-MOCK AND WHERE-MOCK2 AND ( WHERE-MOCK3 OR WHERE-MOCK4 OR WHERE-MOCK5 ) ) AND WHERE-MOCK6 ))', $join->getSQL());
     }
 
     public function testJoinNatural()
@@ -220,7 +221,7 @@ class SelectUnitTest extends TestCase
             $criteria->condition('t.field', '=', 't2.field', true);
         });
         $this->assertInstanceOf(ISelect::class, $join);
-        $this->assertEquals('SELECT t.field FROM  AS  NATURAL JOIN (table AS t) ON (( ( WHERE-MOCK AND WHERE-MOCK2 AND ( WHERE-MOCK3 OR WHERE-MOCK4 OR WHERE-MOCK5 ) ) ))', $join->getSQL());
+        $this->assertEquals('SELECT t.field FROM  AS  NATURAL JOIN (table AS t) ON (( ( WHERE-MOCK AND WHERE-MOCK2 AND ( WHERE-MOCK3 OR WHERE-MOCK4 OR WHERE-MOCK5 ) ) AND WHERE-MOCK6 ))', $join->getSQL());
     }
 
     public function testJoinStraight()
@@ -229,7 +230,7 @@ class SelectUnitTest extends TestCase
             $criteria->condition('t.field', '=', 't2.field', true);
         });
         $this->assertInstanceOf(ISelect::class, $join);
-        $this->assertEquals('SELECT t.field FROM  AS  STRAIGHT_JOIN (table AS t) ON (( ( WHERE-MOCK AND WHERE-MOCK2 AND ( WHERE-MOCK3 OR WHERE-MOCK4 OR WHERE-MOCK5 ) ) ))', $join->getSQL());
+        $this->assertEquals('SELECT t.field FROM  AS  STRAIGHT_JOIN (table AS t) ON (( ( WHERE-MOCK AND WHERE-MOCK2 AND ( WHERE-MOCK3 OR WHERE-MOCK4 OR WHERE-MOCK5 ) ) AND WHERE-MOCK6 ))', $join->getSQL());
     }
 
     /**
@@ -262,7 +263,7 @@ class SelectUnitTest extends TestCase
             });
         });
         $this->assertInstanceOf(ISelect::class, $where);
-        $this->assertEquals('SELECT t.field FROM  AS  WHERE ( ( WHERE-MOCK AND WHERE-MOCK2 AND ( WHERE-MOCK3 OR WHERE-MOCK4 OR WHERE-MOCK5 ) ) )', $where->getSQL());
+        $this->assertEquals('SELECT t.field FROM  AS  WHERE ( ( WHERE-MOCK AND WHERE-MOCK2 AND ( WHERE-MOCK3 OR WHERE-MOCK4 OR WHERE-MOCK5 ) ) AND WHERE-MOCK6 )', $where->getSQL());
     }
 
     public function testGroupBy()
@@ -287,7 +288,7 @@ class SelectUnitTest extends TestCase
             });
         });
         $this->assertInstanceOf(ISelect::class, $having);
-        $this->assertEquals('SELECT t.field FROM  AS  HAVING ( ( WHERE-MOCK AND WHERE-MOCK2 AND ( WHERE-MOCK3 OR WHERE-MOCK4 OR WHERE-MOCK5 ) ) )', $having->getSQL());
+        $this->assertEquals('SELECT t.field FROM  AS  HAVING ( ( WHERE-MOCK AND WHERE-MOCK2 AND ( WHERE-MOCK3 OR WHERE-MOCK4 OR WHERE-MOCK5 ) ) AND WHERE-MOCK6 )', $having->getSQL());
     }
 
     public function testOrderNonArray()
@@ -336,7 +337,7 @@ class SelectUnitTest extends TestCase
             });
         $this->assertInstanceOf(ISelect::class, $subquery);
         $this->assertInstanceOf(ISelect::class, $principal);
-        $this->assertEquals('SELECT t2.field FROM table2 AS t2 WHERE ( ( WHERE-MOCK AND WHERE-MOCK2 AND ( WHERE-MOCK3 OR WHERE-MOCK4 OR WHERE-MOCK5 ) ) )', $principal->getSQL());
+        $this->assertEquals('SELECT t2.field FROM table2 AS t2 WHERE ( ( WHERE-MOCK AND WHERE-MOCK2 AND ( WHERE-MOCK3 OR WHERE-MOCK4 OR WHERE-MOCK5 ) ) AND WHERE-MOCK6 )', $principal->getSQL());
     }
 
     public function testTablesInQuery()
@@ -355,7 +356,7 @@ class SelectUnitTest extends TestCase
         $this->assertInstanceOf(ISelect::class, $subquery);
         $this->assertInstanceOf(ISelect::class, $principal);
         $this->assertEquals(['table4', 'table2', 'table3', 'table'], $principal->getTablesInQuery());
-        $this->assertEquals('SELECT (SELECT t4.field FROM table4 AS t4) AS item FROM table2 AS t2 LEFT JOIN (table3 AS t3) ON (( ( WHERE-MOCK AND WHERE-MOCK2 AND ( WHERE-MOCK3 OR WHERE-MOCK4 OR WHERE-MOCK5 ) ) )) WHERE ( ( WHERE-MOCK AND WHERE-MOCK2 AND ( WHERE-MOCK3 OR WHERE-MOCK4 OR WHERE-MOCK5 ) ) )', $principal->getSQL());
+        $this->assertEquals('SELECT (SELECT t4.field FROM table4 AS t4) AS item FROM table2 AS t2 LEFT JOIN (table3 AS t3) ON (( ( WHERE-MOCK AND WHERE-MOCK2 AND ( WHERE-MOCK3 OR WHERE-MOCK4 OR WHERE-MOCK5 ) ) AND WHERE-MOCK6 )) WHERE ( ( WHERE-MOCK AND WHERE-MOCK2 AND ( WHERE-MOCK3 OR WHERE-MOCK4 OR WHERE-MOCK5 ) ) AND WHERE-MOCK6 )', $principal->getSQL());
     }
 
     public function testTablesInQueryManySelectQuery()
@@ -378,6 +379,6 @@ class SelectUnitTest extends TestCase
         $this->assertInstanceOf(ISelect::class, $subquery);
         $this->assertInstanceOf(ISelect::class, $principal);
         $this->assertEquals(['table4', 'table5', 'table2', 'table3', 'table'], $principal->getTablesInQuery());
-        $this->assertEquals('SELECT (SELECT t4.field FROM table4 AS t4) AS value1,(SELECT t5.field FROM table5 AS t5) AS value2 FROM table2 AS t2 LEFT JOIN (table3 AS t3) ON (( ( WHERE-MOCK AND WHERE-MOCK2 AND ( WHERE-MOCK3 OR WHERE-MOCK4 OR WHERE-MOCK5 ) ) )) WHERE ( ( WHERE-MOCK AND WHERE-MOCK2 AND ( WHERE-MOCK3 OR WHERE-MOCK4 OR WHERE-MOCK5 ) ) )', $principal->getSQL());
+        $this->assertEquals('SELECT (SELECT t4.field FROM table4 AS t4) AS value1,(SELECT t5.field FROM table5 AS t5) AS value2 FROM table2 AS t2 LEFT JOIN (table3 AS t3) ON (( ( WHERE-MOCK AND WHERE-MOCK2 AND ( WHERE-MOCK3 OR WHERE-MOCK4 OR WHERE-MOCK5 ) ) AND WHERE-MOCK6 )) WHERE ( ( WHERE-MOCK AND WHERE-MOCK2 AND ( WHERE-MOCK3 OR WHERE-MOCK4 OR WHERE-MOCK5 ) ) AND WHERE-MOCK6 )', $principal->getSQL());
     }
 }
