@@ -9,6 +9,7 @@ namespace FcPhp\Datasource\MySQL\Strategies
     use FcPhp\Datasource\MySQL\Interfaces\IMySQLFactory;
     use FcPhp\Datasource\MySQL\Exceptions\InvalidJoinTypeException;
     use FcPhp\Datasource\MySQL\Exceptions\InvalidMethodException;
+    use FcPhp\Datasource\MySQL\Interfaces\Strategies\Select\ISelect;
 
     class MySQLStrategy extends Strategy implements IStrategy, IMySQLStrategy
     {
@@ -72,7 +73,14 @@ namespace FcPhp\Datasource\MySQL\Strategies
                 return call_user_func_array([$instance, $method], $args);
             }
             throw new InvalidMethodException();
-            
-        }        
+        }
+
+        public function execute(ISelect $query)
+        {
+            return [
+                'tables' => $query->getTablesInQuery(),
+                'sql' => $query->getSQL(),
+            ];
+        }
     }
 }

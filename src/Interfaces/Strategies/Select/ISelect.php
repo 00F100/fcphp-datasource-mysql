@@ -21,7 +21,7 @@ namespace FcPhp\Datasource\MySQL\Interfaces\Strategies\Select
          *
          * @return FcPhp\Datasource\Interfaces\ICriteria
          */
-        public function getCriteria() :ICriteria;
+        public function getCriteria();
 
         /**
          * Method to configure Select Rule

@@ -142,7 +142,7 @@ namespace FcPhp\Datasource\MySQL\Strategies\Select
          *
          * @return FcPhp\Datasource\Interfaces\ICriteria
          */
-        public function getCriteria() :ICriteria
+        public function getCriteria()
         {
             return $this->strategy->getCriteria();
         }
@@ -226,7 +226,7 @@ namespace FcPhp\Datasource\MySQL\Strategies\Select
         /**
          * Method to confire fields to select
          *
-         * @param string|array $fields Field(s) to select
+         * @param string|array|ISelect $fields Field(s) to select
          * @return FcPhp\Datasource\MySQL\Interfaces\Strategies\Select\ISelect
          */
         public function select($fields, string $alias = null) :ISelect

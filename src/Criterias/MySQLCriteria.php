@@ -83,11 +83,22 @@ namespace FcPhp\Datasource\MySQL\Criterias
             return $this;
         }
 
+        /**
+         * Method to return where
+         *
+         * @return array
+         */
         public function getWhere() :array
         {
             return $this->where;
         }
-        public function getTablesInQuery()
+        
+        /**
+         * Method to return list of table(s) used on query
+         *
+         * @return array
+         */
+        public function getTablesInQuery() :array
         {
             return $this->tablesInQuery;
         }
