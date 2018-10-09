@@ -171,5 +171,12 @@ namespace FcPhp\Datasource\MySQL\Interfaces\Strategies\Select
          * @return string
          */
         public function getSQL() :string;
+
+        /**
+         * Method to return list of Tables in query
+         * 
+         * @return array
+         */
+        public function getTablesInQuery();
     }
 }

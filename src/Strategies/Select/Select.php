@@ -124,6 +124,9 @@ namespace FcPhp\Datasource\MySQL\Strategies\Select
          */
         protected $strategy;
 
+        /**
+         * @var array
+         */
         protected $tablesInQuery = [];
 
         /**
@@ -462,6 +465,11 @@ namespace FcPhp\Datasource\MySQL\Strategies\Select
             ]));
         }
 
+        /**
+         * Method to return list of Tables in query
+         * 
+         * @return array
+         */
         public function getTablesInQuery()
         {
             return $this->tablesInQuery;

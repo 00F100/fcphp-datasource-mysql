@@ -35,7 +35,7 @@ namespace FcPhp\Datasource\MySQL\Strategies
 
         protected $availableMethods = [
             self::DATASOURCE_MYSQL_STRATEGY_SELECT => 'select',
-            // self::DATASOURCE_MYSQL_STRATEGY_INSERT => 'insert',
+            self::DATASOURCE_MYSQL_STRATEGY_INSERT => 'insert',
             // self::DATASOURCE_MYSQL_STRATEGY_UPDATE => 'update',
             // self::DATASOURCE_MYSQL_STRATEGY_DELETE => 'delete',
             // self::DATASOURCE_MYSQL_STRATEGY_CREATE => 'create',
