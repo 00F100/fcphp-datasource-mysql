@@ -247,6 +247,17 @@ class SelectIntegrationTest extends TestCase
         $this->assertEquals('SELECT t.field FROM  AS  WHERE ( ( campo = 500 AND campo2 = 500 AND ( field = "value" OR field2 < "value2" ) AND campo3 = "abc" AND campo3 = "abc" AND ( field = "value" OR field2 < "value123122" ) AND campo3 = "abc" ) )', $where->getSQL());
     }
 
+    public function testWhereIn()
+    {
+        $whereIn = $this->instance->select('t.field')->where(function(ICriteria $criteria) {
+            $criteria->and(function(ICriteria $criteria) {
+                $criteria->condition('campo', 'IN', [500, '200', false]);
+            });
+        });
+        $this->assertInstanceOf(ISelect::class, $whereIn);
+        $this->assertEquals('SELECT t.field FROM  AS  WHERE ( ( campo IN (500,"200",0) ) )', $whereIn->getSQL());
+    }
+
     public function testGroupBy()
     {
         $groupBy = $this->instance->select('t.field')->groupBy('t.field2')->groupBy('t.field3');

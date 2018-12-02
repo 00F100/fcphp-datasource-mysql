@@ -79,6 +79,21 @@ namespace FcPhp\Datasource\MySQL\Criterias
                 }
                 $value = '(' . $value->getSQL() . ')';
             }
+            if(is_array($value)) {
+                $newValue = [];
+                foreach($value as $content) {
+                    if(is_int($content)) {
+                        $newValue[] = $content;
+                    }else{
+                        if(is_bool($content)) {
+                            $newValue[] = ($content === true ? 1 : 0);
+                        }else{
+                            $newValue[] = '"' . $content . '"';
+                        }
+                    }
+                }
+                $value = '(' . implode(',', $newValue) . ')';
+            }
             $this->where[] = $field . $this->conditionSpace . $condition . $this->conditionSpace . $value;
             return $this;
         }

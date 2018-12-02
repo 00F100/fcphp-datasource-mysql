@@ -49,6 +49,14 @@ namespace FcPhp\Datasource\MySQL\Strategies\Insert
          */
         protected $values = [];
 
+        /**
+         * @var array List of commands on duplicate key
+         */
+        protected $duplicateKey = [];
+
+        /**
+         * @var array List of Tables in query
+         */
         protected $tablesInQuery = [];
 
         /**
@@ -137,6 +145,25 @@ namespace FcPhp\Datasource\MySQL\Strategies\Insert
         }
 
         /**
+         * Method to define values of Insert on duplicate key has found
+         *
+         * @param string|array $key Single key or list of Duplicate Keys
+         * @param $value string|null String to bind with $key
+         * @return FcPhp\Datasource\MySQL\Interfaces\Strategies\Insert\IInsert
+         */
+        public function duplicateKey($key, $value = null) :IInsert
+        {
+            if(is_array($key)) {
+                foreach($key as $index => $value) {
+                    $this->duplicateKey[$index] = $value;
+                }
+            }else{
+                $this->duplicateKey[$key] = $value;
+            }
+            return $this;
+        }
+
+        /**
          * Method to return SQL Insert
          *
          * @return string
@@ -149,10 +176,16 @@ namespace FcPhp\Datasource\MySQL\Strategies\Insert
                 ($this->into ? ' INTO' : '') .
                 (!empty($this->table) ? ' ' . $this->table : '') .
                 (count($this->columns) > 0 ? ' (' . $this->mountColumns($this->columns) . ')' : '') .
-                (count($this->values) > 0 ? ' VALUES (' . $this->mountValues($this->columns, $this->values) . ')' : '')
+                (count($this->values) > 0 ? ' VALUES (' . $this->mountValues($this->columns, $this->values) . ')' : '') .
+                (count($this->duplicateKey) > 0 ? ' ON DUPLICATE KEY UPDATE ' . $this->mountDuplicateKey($this->duplicateKey) : '')
             ));
         }
 
+        /**
+         * Method to return list of Tables in query
+         * 
+         * @return array
+         */
         public function getTablesInQuery()
         {
             return $this->tablesInQuery;
@@ -167,6 +200,36 @@ namespace FcPhp\Datasource\MySQL\Strategies\Insert
         private function mountColumns(array $columns)
         {
             return implode(',', $columns);
+        }
+
+        /**
+         * Method to return duplicate key actions
+         *
+         * @param array $duplicateKey List of duplicate keys
+         * @return string
+         */
+        private function mountDuplicateKey(array $duplicateKey) :string
+        {
+            $count = 0;
+            $total = (count($duplicateKey)-1);
+            $return = [];
+            foreach($duplicateKey as $column => $value) {
+                $return[] = '`' . $column . '` ';
+                if(is_int($value)) {
+                    $return[] = '= ' . $value;
+                }else{
+                    if(is_bool($value)) {
+                        $return[] = '= ' . ($value === true ? 1 : 0);
+                    }else{
+                        $return[] = '= "' . $value . '"';
+                    }
+                }
+                if($count < $total) {
+                    $return[] = ',';
+                }
+                $count++;
+            }
+            return implode('', $return);
         }
 
         /**

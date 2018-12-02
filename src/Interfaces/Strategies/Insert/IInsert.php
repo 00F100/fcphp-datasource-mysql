@@ -62,5 +62,12 @@ namespace FcPhp\Datasource\MySQL\Interfaces\Strategies\Insert
          * @return string
          */
         public function getSQL();
+
+        /**
+         * Method to return list of Tables in query
+         * 
+         * @return array
+         */
+        public function getTablesInQuery();
     }
 }

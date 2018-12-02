@@ -48,33 +48,9 @@ $instance = new MySQL('mysql', $dataConnection);
 
 $strategies = [
     'mysql' => 'FcPhp/Datasource/MySQL/Strategies/MySQLStrategy',
-    'postgresql' => 'FcPhp/PostgreSQL/Strategies/PostgreSQL',
-    'sqlserver' => 'FcPhp/SQLServer/Strategies/SQLServer',
-    'sqlite' => 'FcPhp/SQLite/Strategies/SQLite',
-    'mongodb' => 'FcPhp/MongoDB/Strategies/MongoDB',
-    'soap' => 'FcPhp/SOAP/Strategies/SOAP',
-    'ldap' => 'FcPhp/Ldap/Strategies/Ldap',
-    'rest' => 'FcPhp/Rest/Strategies/Rest',
-    'file' => 'FcPhp/File/Strategies/File',
-    'amazon-bucket' => 'FcPhp/Amazon/Strategies/Bucket',
-    'amazon-log' => 'FcPhp/Amazon/Strategies/Log',
-    'amazon-sqs' => 'FcPhp/Amazon/Strategies/Sqs',
-    'amazon-redshift' => 'FcPhp/Amazon/Strategies/Redshift',
 ];
 $criterias = [
     'mysql' => 'FcPhp/Datasource/MySQL/Criterias/MySQL',
-    'postgresql' => 'FcPhp/PostgreSQL/Criterias/PostgreSQL',
-    'sqlserver' => 'FcPhp/SQLServer/Criterias/SQLServer',
-    'sqlite' => 'FcPhp/SQLite/Criterias/SQLite',
-    'mongodb' => 'FcPhp/MongoDB/Criterias/MongoDB',
-    'soap' => 'FcPhp/SOAP/Criterias/SOAP',
-    'ldap' => 'FcPhp/Ldap/Criterias/Ldap',
-    'rest' => 'FcPhp/Rest/Criterias/Rest',
-    'file' => 'FcPhp/File/Criterias/File',
-    'amazon-bucket' => 'FcPhp/Amazon/Criterias/Bucket',
-    'amazon-log' => 'FcPhp/Amazon/Criterias/Log',
-    'amazon-sqs' => 'FcPhp/Amazon/Criterias/Sqs',
-    'amazon-redshift' => 'FcPhp/Amazon/Criterias/Redshift',
 ];
 $di = DiFacade::getInstance();
 $factory = new Factory($strategies, $criterias, $di);
@@ -82,9 +58,39 @@ $strategy = new Strategy('mysql', $factory);
 
 $query = new Query($strategy);
 
+```
+
+### SELECT
+
+```php
 // Configure query
 
-$query->select('t.field')->from('table', 't')->where(function(ICriteria $criteria) {
+// SELECT t.field
+//  FROM table AS t
+//  LEFT JOIN table AS t2 ON t2.field = t.field AND t2.field = "string"
+//  WHERE (
+//      (
+//          campo = 500 AND
+//          campo2 = 500 AND (
+//              field = "value" OR
+//              field2 < "value2"
+//          ) AND
+//          campo3 = "abc" AND
+//          campo3 = "abc" AND (
+//              field = "value" OR
+//              field2 < "value123122"
+//          ) AND
+//          campo3 IN (10,20,30)
+//      )
+//  )
+
+$query->select('t.field')
+    ->from('table', 't')
+    ->join('LEFT', ['t2' => 'table'], function(ICriteria $criteria) {
+        $criteria->condition('t2.field', '=', 't.field', true);
+        $criteria->condition('t2.field', '=', 'string');
+    })
+    ->where(function(ICriteria $criteria) {
     $criteria->and(function(ICriteria $criteria) {
         $criteria->condition('campo', '=', 500);
         $criteria->condition('campo2', '=', 500);
@@ -98,9 +104,40 @@ $query->select('t.field')->from('table', 't')->where(function(ICriteria $criteri
             $criteria->condition('field', '=', 'value');
             $criteria->condition('field2', '<', 'value123122');
         });
-        $criteria->condition('campo3', '=', 'abc');
+        $criteria->condition('campo3', 'IN', [10, 20, 30]);
     });
 });
+
+```
+
+### INSERT
+
+```php
+// Configure query
+
+// INSERT INTO
+//  (column1,column2,column3) VALUES
+//  (100,"content2",0)
+//      ON DUPLICATE KEY UPDATE
+//          `column1` = 50,
+//          `column2` = "content to update",
+//          `column3` = 1
+
+$query->insert()
+    ->columns(['column1', 'column2', 'column3'])
+    ->values('column2', 'content2')
+    ->values('column3', false)
+    ->values('column1', 100)
+    ->duplicateKey([
+        'column1' => 50,
+        'column2' => 'content to update',
+        'column3' => true
+    ]);
+```
+
+### EXECUTE
+
+```php
 
 // Execute Query
 

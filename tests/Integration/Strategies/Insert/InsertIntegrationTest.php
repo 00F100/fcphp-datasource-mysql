@@ -164,4 +164,50 @@ class InsertIntegrationTest extends TestCase
         $this->assertEquals('INSERT INTO table2 (column1,column2,column3,column4,column5) VALUES (SELECT t.field1,t.field2,t.field3,t.field4,t.field5 FROM table AS t)', $values->getSQL());
         $this->assertEquals(['table2', 'table'], $values->getTablesInQuery());
     }
+
+    public function testOnDuplicateKeySingle()
+    {
+        $duplicateKey = $this->instance
+            ->columns(['column1', 'column2', 'column3'])
+            ->values('column2', 'content2')
+            ->values('column3', false)
+            ->values('column1', 100)
+            ->duplicateKey('column1', 50);
+
+        $this->assertInstanceOf(IInsert::class, $duplicateKey);
+        $this->assertEquals('INSERT INTO (column1,column2,column3) VALUES (100,"content2",0) ON DUPLICATE KEY UPDATE `column1` = 50', $duplicateKey->getSQL());
+    }
+
+    public function testOnDuplicateKeyMulti()
+    {
+        $duplicateKey = $this->instance
+            ->columns(['column1', 'column2', 'column3'])
+            ->values('column2', 'content2')
+            ->values('column3', false)
+            ->values('column1', 100)
+            ->duplicateKey('column1', 50)
+            ->duplicateKey('column2', 'content to update');
+
+        $this->assertInstanceOf(IInsert::class, $duplicateKey);
+        $this->assertEquals('INSERT INTO (column1,column2,column3) VALUES (100,"content2",0) ON DUPLICATE KEY UPDATE `column1` = 50,`column2` = "content to update"', $duplicateKey->getSQL());
+    }
+
+    public function testOnDuplicateKeyList()
+    {
+        $duplicateKeyList = [
+            'column1' => 50,
+            'column2' => 'content to update',
+            'column3' => true
+        ];
+
+        $duplicateKey = $this->instance
+            ->columns(['column1', 'column2', 'column3'])
+            ->values('column2', 'content2')
+            ->values('column3', false)
+            ->values('column1', 100)
+            ->duplicateKey($duplicateKeyList);
+
+        $this->assertInstanceOf(IInsert::class, $duplicateKey);
+        $this->assertEquals('INSERT INTO (column1,column2,column3) VALUES (100,"content2",0) ON DUPLICATE KEY UPDATE `column1` = 50,`column2` = "content to update",`column3` = 1', $duplicateKey->getSQL());
+    }
 }
