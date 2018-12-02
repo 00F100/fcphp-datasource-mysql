@@ -57,6 +57,15 @@ namespace FcPhp\Datasource\MySQL\Interfaces\Strategies\Insert
         public function values($key, $value = null) :IInsert;
 
         /**
+         * Method to define values of Insert on duplicate key has found
+         *
+         * @param string|array $key Single key or list of Duplicate Keys
+         * @param $value string|null String to bind with $key
+         * @return FcPhp\Datasource\MySQL\Interfaces\Strategies\Insert\IInsert
+         */
+        public function duplicateKey($key, $value = null) :IInsert;
+
+        /**
          * Method to return SQL Insert
          *
          * @return string
