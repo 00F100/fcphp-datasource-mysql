@@ -30,7 +30,7 @@ namespace FcPhp\Datasource\MySQL\Interfaces
          * @param string|int|bool $value Value to compare
          * @return FcPhp\Datasource\Interfaces\ICriteria
          */
-        public function condition(string $field, string $condition, $value, bool $isColumn = false, bool $parentheses = false) :ICriteria;
+        public function condition($field, string $condition, $value, bool $isColumn = false, bool $parentheses = false) :ICriteria;
 
         /**
          * Method to return where

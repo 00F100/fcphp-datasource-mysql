@@ -30,13 +30,15 @@ namespace FcPhp\Datasource\MySQL\Strategies
         const DATASOURCE_MYSQL_STRATEGY_EXECUTE = 12;
         const DATASOURCE_MYSQL_STRATEGY_DEALLOCATE = 13;
         const DATASOURCE_MYSQL_STRATEGY_BEGIN = 14;
-        const DATASOURCE_MYSQL_STRATEGY_REPEAT = 14;
-        const DATASOURCE_MYSQL_STRATEGY_DELIMITER = 15;
+        const DATASOURCE_MYSQL_STRATEGY_REPEAT = 15;
+        const DATASOURCE_MYSQL_STRATEGY_DELIMITER = 16;
+        const DATASOURCE_MYSQL_STRATEGY_RAW = 17;
 
         protected $availableMethods = [
+            self::DATASOURCE_MYSQL_STRATEGY_RAW => 'raw',
             self::DATASOURCE_MYSQL_STRATEGY_SELECT => 'select',
             self::DATASOURCE_MYSQL_STRATEGY_INSERT => 'insert',
-            // self::DATASOURCE_MYSQL_STRATEGY_UPDATE => 'update',
+            self::DATASOURCE_MYSQL_STRATEGY_UPDATE => 'update',
             // self::DATASOURCE_MYSQL_STRATEGY_DELETE => 'delete',
             // self::DATASOURCE_MYSQL_STRATEGY_CREATE => 'create',
             // self::DATASOURCE_MYSQL_STRATEGY_ALTER => 'alter',

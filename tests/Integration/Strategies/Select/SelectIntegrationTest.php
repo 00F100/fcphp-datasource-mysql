@@ -35,183 +35,204 @@ class SelectIntegrationTest extends TestCase
 
     public function testSelect()
     {
-        $select = $this->instance->select('t.field');
+        $select = $this->instance->select('t.field')->from('table', 't');
         $this->assertInstanceOf(ISelect::class, $select);
-        $this->assertEquals('SELECT t.field FROM  AS ', $select->getSQL());
+        $this->assertEquals('SELECT `t`.`field` FROM `table` AS `t`', $select->getSQL());
+    }
+
+    public function testSelectSum()
+    {
+        $select = $this->instance->select($this->instance->sum('t.field'))->from('table', 't');
+        $this->assertInstanceOf(ISelect::class, $select);
+        $this->assertEquals('SELECT SUM(`t`.`field`) FROM `table` AS `t`', $select->getSQL());
+    }
+
+    public function testSelectRaw()
+    {
+        $select = $this->instance->select($this->instance->raw('MAX(`a`.`content`)'))->from('table', 't');
+        $this->assertInstanceOf(ISelect::class, $select);
+        $this->assertEquals('SELECT MAX(`a`.`content`) FROM `table` AS `t`', $select->getSQL());
     }
 
     public function testSelectRuleDistinct()
     {
-        $selectRule = $this->instance->select('t.field')->selectRule('DISTINCT');
+        $selectRule = $this->instance->from('table')->select('field')->selectRule('DISTINCT');
         $this->assertInstanceOf(ISelect::class, $selectRule);
-        $this->assertEquals('SELECT DISTINCT t.field FROM  AS ', $selectRule->getSQL());
+        $this->assertEquals('SELECT DISTINCT `field` FROM `table`', $selectRule->getSQL());
     }
 
     public function testSelectRuleAll()
     {
-        $selectRule = $this->instance->select('t.field')->selectRule('ALL');
+        $selectRule = $this->instance->from('table', 't')->select('t.field')->selectRule('ALL');
         $this->assertInstanceOf(ISelect::class, $selectRule);
-        $this->assertEquals('SELECT ALL t.field FROM  AS ', $selectRule->getSQL());
+        $this->assertEquals('SELECT ALL `t`.`field` FROM `table` AS `t`', $selectRule->getSQL());
     }
 
     public function testSelectRuleDistinctRow()
     {
-        $selectRule = $this->instance->select('t.field')->selectRule('DISTINCTROW');
+        $selectRule = $this->instance->from('table', 't')->select('t.field')->selectRule('DISTINCTROW');
         $this->assertInstanceOf(ISelect::class, $selectRule);
-        $this->assertEquals('SELECT DISTINCTROW t.field FROM  AS ', $selectRule->getSQL());
+        $this->assertEquals('SELECT DISTINCTROW `t`.`field` FROM `table` AS `t`', $selectRule->getSQL());
     }
 
     public function testHighPriority()
     {
-        $highPriority = $this->instance->select('t.field')->highPriority(true);
+        $highPriority = $this->instance->from('table', 't')->select('t.field')->highPriority(true);
         $this->assertInstanceOf(ISelect::class, $highPriority);
-        $this->assertEquals('SELECT HIGH_PRIORITY t.field FROM  AS ', $highPriority->getSQL());
+        $this->assertEquals('SELECT HIGH_PRIORITY `t`.`field` FROM `table` AS `t`', $highPriority->getSQL());
     }
 
     public function testStraightJoin()
     {
-        $straightJoin = $this->instance->select('t.field')->straightJoin(true);
+        $straightJoin = $this->instance->from('table', 't')->select('t.field')->straightJoin(true);
         $this->assertInstanceOf(ISelect::class, $straightJoin);
-        $this->assertEquals('SELECT STRAIGHT_JOIN t.field FROM  AS ', $straightJoin->getSQL());
+        $this->assertEquals('SELECT STRAIGHT_JOIN `t`.`field` FROM `table` AS `t`', $straightJoin->getSQL());
     }
 
     public function testSizeResultSqlSmallResult()
     {
-        $sizeResult = $this->instance->select('t.field')->sizeResult('SQL_SMALL_RESULT');
+        $sizeResult = $this->instance->from('table', 't')->select('t.field')->sizeResult('SQL_SMALL_RESULT');
         $this->assertInstanceOf(ISelect::class, $sizeResult);
-        $this->assertEquals('SELECT SQL_SMALL_RESULT t.field FROM  AS ', $sizeResult->getSQL());
+        $this->assertEquals('SELECT SQL_SMALL_RESULT `t`.`field` FROM `table` AS `t`', $sizeResult->getSQL());
     }
 
     public function testSizeResultSqlBigResult()
     {
-        $sizeResult = $this->instance->select('t.field')->sizeResult('SQL_BIG_RESULT');
+        $sizeResult = $this->instance->from('table', 't')->select('t.field')->sizeResult('SQL_BIG_RESULT');
         $this->assertInstanceOf(ISelect::class, $sizeResult);
-        $this->assertEquals('SELECT SQL_BIG_RESULT t.field FROM  AS ', $sizeResult->getSQL());
+        $this->assertEquals('SELECT SQL_BIG_RESULT `t`.`field` FROM `table` AS `t`', $sizeResult->getSQL());
     }
 
     public function testSizeResultSqlBufferResult()
     {
-        $sizeResult = $this->instance->select('t.field')->sizeResult('SQL_BUFFER_RESULT');
+        $sizeResult = $this->instance->from('table', 't')->select('t.field')->sizeResult('SQL_BUFFER_RESULT');
         $this->assertInstanceOf(ISelect::class, $sizeResult);
-        $this->assertEquals('SELECT SQL_BUFFER_RESULT t.field FROM  AS ', $sizeResult->getSQL());
+        $this->assertEquals('SELECT SQL_BUFFER_RESULT `t`.`field` FROM `table` AS `t`', $sizeResult->getSQL());
     }
 
     public function testNoCache()
     {
-        $noCache = $this->instance->select('t.field')->noCache(true);
+        $noCache = $this->instance->from('table', 't')->select('t.field')->noCache(true);
         $this->assertInstanceOf(ISelect::class, $noCache);
-        $this->assertEquals('SELECT SQL_NO_CACHE t.field FROM  AS ', $noCache->getSQL());
+        $this->assertEquals('SELECT SQL_NO_CACHE `t`.`field` FROM `table` AS `t`', $noCache->getSQL());
     }
 
     public function testCalcFoundRows()
     {
-        $calcFoundRows = $this->instance->select('t.field')->sqlCalcFoundRows(true);
+        $calcFoundRows = $this->instance->from('table', 't')->select('t.field')->sqlCalcFoundRows(true);
         $this->assertInstanceOf(ISelect::class, $calcFoundRows);
-        $this->assertEquals('SELECT SQL_CALC_FOUND_ROWS t.field FROM  AS ', $calcFoundRows->getSQL());
+        $this->assertEquals('SELECT SQL_CALC_FOUND_ROWS `t`.`field` FROM `table` AS `t`', $calcFoundRows->getSQL());
     }
 
     public function testSelectOne()
     {
-        $select = $this->instance->select('t.field');
+        $select = $this->instance->from('table', 't')->select('t.field');
         $this->assertInstanceOf(ISelect::class, $select);
-        $this->assertEquals('SELECT t.field FROM  AS ', $select->getSQL());
+        $this->assertEquals('SELECT `t`.`field` FROM `table` AS `t`', $select->getSQL());
+    }
+
+    public function testSelectOneAlias()
+    {
+        $select = $this->instance->from('table', 't')->select('t.field', 'name');
+        $this->assertInstanceOf(ISelect::class, $select);
+        $this->assertEquals('SELECT `t`.`field` AS `name` FROM `table` AS `t`', $select->getSQL());
     }
 
     public function testSelectMulti()
     {
-        $select = $this->instance->select(['t.field', 't.field2']);
+        $select = $this->instance->from('table', 't')->select(['t.field', 't.field2']);
         $this->assertInstanceOf(ISelect::class, $select);
-        $this->assertEquals('SELECT t.field,t.field2 FROM  AS ', $select->getSQL());
+        $this->assertEquals('SELECT `t`.`field`,`t`.`field2` FROM `table` AS `t`', $select->getSQL());
     }
 
     public function testSelectMultiWithAlias()
     {
-        $select = $this->instance->select(['alias1' => 't.field', 'alias2' => 't.field2']);
+        $select = $this->instance->from('table', 't')->select(['alias1' => 't.field', 'alias2' => 't.field2']);
         $this->assertInstanceOf(ISelect::class, $select);
-        $this->assertEquals('SELECT t.field AS alias1,t.field2 AS alias2 FROM  AS ', $select->getSQL());
+        $this->assertEquals('SELECT `t`.`field` AS `alias1`,`t`.`field2` AS `alias2` FROM `table` AS `t`', $select->getSQL());
     }
 
     public function testFrom()
     {
         $from = $this->instance->select('t.field')->from('table', 't');
         $this->assertInstanceOf(ISelect::class, $from);
-        $this->assertEquals('SELECT t.field FROM table AS t', $from->getSQL());
+        $this->assertEquals('SELECT `t`.`field` FROM `table` AS `t`', $from->getSQL());
     }
 
     public function testJoinLeft()
     {
-        $join = $this->instance->select('t.field')->join('LEFT', ['t' => 'table'], function(ICriteria $criteria) {
+        $join = $this->instance->from('table', 't')->select('t.field')->join('LEFT', ['t2' => 'table'], function(ICriteria $criteria) {
             $criteria->condition('t.field', '=', 't2.field', true);
         });
         $this->assertInstanceOf(ISelect::class, $join);
-        $this->assertEquals('SELECT t.field FROM  AS  LEFT JOIN (table AS t) ON (( t.field = t2.field ))', $join->getSQL());
+        $this->assertEquals('SELECT `t`.`field` FROM `table` AS `t` LEFT JOIN (`table` AS `t2`) ON (( `t`.`field` = `t2`.`field` ))', $join->getSQL());
     }
 
     public function testJoinRight()
     {
-        $join = $this->instance->select('t.field')->join('RIGHT', ['t' => 'table'], function(ICriteria $criteria) {
+        $join = $this->instance->from('table', 't')->select('t.field')->join('RIGHT', ['t' => 'table'], function(ICriteria $criteria) {
             $criteria->condition('t.field', '=', 't2.field', true);
         });
         $this->assertInstanceOf(ISelect::class, $join);
-        $this->assertEquals('SELECT t.field FROM  AS  RIGHT JOIN (table AS t) ON (( t.field = t2.field ))', $join->getSQL());
+        $this->assertEquals('SELECT `t`.`field` FROM `table` AS `t` RIGHT JOIN (`table` AS `t`) ON (( `t`.`field` = `t2`.`field` ))', $join->getSQL());
     }
 
     public function testJoinInner()
     {
-        $join = $this->instance->select('t.field')->join('INNER', ['t' => 'table'], function(ICriteria $criteria) {
+        $join = $this->instance->from('table', 't')->select('t.field')->join('INNER', ['t' => 'table'], function(ICriteria $criteria) {
             $criteria->condition('t.field', '=', 't2.field', true);
         });
         $this->assertInstanceOf(ISelect::class, $join);
-        $this->assertEquals('SELECT t.field FROM  AS  INNER JOIN (table AS t) ON (( t.field = t2.field ))', $join->getSQL());
+        $this->assertEquals('SELECT `t`.`field` FROM `table` AS `t` INNER JOIN (`table` AS `t`) ON (( `t`.`field` = `t2`.`field` ))', $join->getSQL());
     }
 
     public function testJoinInnerWhere()
     {
-        $join = $this->instance->select('t.field')->join('INNER', ['t' => 'table'], function(ICriteria $criteria) {
+        $join = $this->instance->from('table', 't')->select('t.field')->join('INNER', ['t' => 'table'], function(ICriteria $criteria) {
             $criteria->or(function(ICriteria $criteria) {
                 $criteria->condition('t.field', '=', 't2.field', true);
                 $criteria->condition('t.field2', '=', 't2.field2', true);
             });
         });
         $this->assertInstanceOf(ISelect::class, $join);
-        $this->assertEquals('SELECT t.field FROM  AS  INNER JOIN (table AS t) ON (( ( t.field = t2.field OR t.field2 = t2.field2 ) ))', $join->getSQL());
+        $this->assertEquals('SELECT `t`.`field` FROM `table` AS `t` INNER JOIN (`table` AS `t`) ON (( ( `t`.`field` = `t2`.`field` OR `t`.`field2` = `t2`.`field2` ) ))', $join->getSQL());
     }
 
     public function testJoinInnerMultiTable()
     {
-        $join = $this->instance->select('t.field')->join('INNER', ['t' => 'table', 't2' => 'table2'], function(ICriteria $criteria) {
+        $join = $this->instance->from('table', 't')->select('t.field')->join('INNER', ['t' => 'table', 't2' => 'table2'], function(ICriteria $criteria) {
             $criteria->condition('t.field', '=', 't2.field', true);
             $criteria->condition('t.field2', '=', 't2.field2', true);
         });
         $this->assertInstanceOf(ISelect::class, $join);
-        $this->assertEquals('SELECT t.field FROM  AS  INNER JOIN (table AS t,table2 AS t2) ON (( t.field = t2.field AND t.field2 = t2.field2 ))', $join->getSQL());
+        $this->assertEquals('SELECT `t`.`field` FROM `table` AS `t` INNER JOIN (`table` AS `t`,`table2` AS `t2`) ON (( `t`.`field` = `t2`.`field` AND `t`.`field2` = `t2`.`field2` ))', $join->getSQL());
     }
 
     public function testJoinOuter()
     {
-        $join = $this->instance->select('t.field')->join('OUTER', ['t' => 'table'], function(ICriteria $criteria) {
+        $join = $this->instance->from('table', 't')->select('t.field')->join('OUTER', ['t' => 'table'], function(ICriteria $criteria) {
             $criteria->condition('t.field', '=', 't2.field', true);
         });
         $this->assertInstanceOf(ISelect::class, $join);
-        $this->assertEquals('SELECT t.field FROM  AS  OUTER JOIN (table AS t) ON (( t.field = t2.field ))', $join->getSQL());
+        $this->assertEquals('SELECT `t`.`field` FROM `table` AS `t` OUTER JOIN (`table` AS `t`) ON (( `t`.`field` = `t2`.`field` ))', $join->getSQL());
     }
 
     public function testJoinNatural()
     {
-        $join = $this->instance->select('t.field')->join('NATURAL', ['t' => 'table'], function(ICriteria $criteria) {
+        $join = $this->instance->from('table', 't')->select('t.field')->join('NATURAL', ['t' => 'table'], function(ICriteria $criteria) {
             $criteria->condition('t.field', '=', 't2.field', true);
         });
         $this->assertInstanceOf(ISelect::class, $join);
-        $this->assertEquals('SELECT t.field FROM  AS  NATURAL JOIN (table AS t) ON (( t.field = t2.field ))', $join->getSQL());
+        $this->assertEquals('SELECT `t`.`field` FROM `table` AS `t` NATURAL JOIN (`table` AS `t`) ON (( `t`.`field` = `t2`.`field` ))', $join->getSQL());
     }
 
     public function testJoinStraight()
     {
-        $join = $this->instance->select('t.field')->join('STRAIGHT', ['t' => 'table'], function(ICriteria $criteria) {
+        $join = $this->instance->from('table', 't')->select('t.field')->join('STRAIGHT', ['t' => 'table'], function(ICriteria $criteria) {
             $criteria->condition('t.field', '=', 't2.field', true);
         });
         $this->assertInstanceOf(ISelect::class, $join);
-        $this->assertEquals('SELECT t.field FROM  AS  STRAIGHT_JOIN (table AS t) ON (( t.field = t2.field ))', $join->getSQL());
+        $this->assertEquals('SELECT `t`.`field` FROM `table` AS `t` STRAIGHT_JOIN (`table` AS `t`) ON (( `t`.`field` = `t2`.`field` ))', $join->getSQL());
     }
 
     /**
@@ -226,7 +247,7 @@ class SelectIntegrationTest extends TestCase
 
     public function testWhereAndOr()
     {
-        $where = $this->instance->select('t.field')->where(function(ICriteria $criteria) {
+        $where = $this->instance->from('table', 't')->select('t.field')->where(function(ICriteria $criteria) {
             $criteria->and(function(ICriteria $criteria) {
                 $criteria->condition('campo', '=', 500);
                 $criteria->condition('campo2', '=', 500);
@@ -244,78 +265,78 @@ class SelectIntegrationTest extends TestCase
             });
         });
         $this->assertInstanceOf(ISelect::class, $where);
-        $this->assertEquals('SELECT t.field FROM  AS  WHERE ( ( campo = 500 AND campo2 = 500 AND ( field = "value" OR field2 < "value2" ) AND campo3 = "abc" AND campo3 = "abc" AND ( field = "value" OR field2 < "value123122" ) AND campo3 = "abc" ) )', $where->getSQL());
+        $this->assertEquals('SELECT `t`.`field` FROM `table` AS `t` WHERE ( ( `campo` = 500 AND `campo2` = 500 AND ( `field` = "value" OR `field2` < "value2" ) AND `campo3` = "abc" AND `campo3` = "abc" AND ( `field` = "value" OR `field2` < "value123122" ) AND `campo3` = "abc" ) )', $where->getSQL());
     }
 
     public function testWhereIn()
     {
-        $whereIn = $this->instance->select('t.field')->where(function(ICriteria $criteria) {
+        $whereIn = $this->instance->from('table', 't')->select('t.field')->where(function(ICriteria $criteria) {
             $criteria->and(function(ICriteria $criteria) {
                 $criteria->condition('campo', 'IN', [500, '200', false]);
             });
         });
         $this->assertInstanceOf(ISelect::class, $whereIn);
-        $this->assertEquals('SELECT t.field FROM  AS  WHERE ( ( campo IN (500,"200",0) ) )', $whereIn->getSQL());
+        $this->assertEquals('SELECT `t`.`field` FROM `table` AS `t` WHERE ( ( `campo` IN (500,"200",0) ) )', $whereIn->getSQL());
     }
 
     public function testGroupBy()
     {
-        $groupBy = $this->instance->select('t.field')->groupBy('t.field2')->groupBy('t.field3');
+        $groupBy = $this->instance->from('table', 't')->select('t.field')->groupBy('t.field2')->groupBy('t.field3');
         $this->assertInstanceOf(ISelect::class, $groupBy);
-        $this->assertEquals('SELECT t.field FROM  AS GROUP BY t.field2,t.field3', $groupBy->getSQL());
+        $this->assertEquals('SELECT `t`.`field` FROM `table` AS `t` GROUP BY `t`.`field2`,`t`.`field3`', $groupBy->getSQL());
     }
 
     public function testGroupByWithRollup()
     {
-        $groupBy = $this->instance->select('t.field')->groupBy('t.field2')->groupBy('t.field3')->groupByWithRollup(true);
+        $groupBy = $this->instance->from('table', 't')->select('t.field')->groupBy('t.field2')->groupBy('t.field3')->groupByWithRollup(true);
         $this->assertInstanceOf(ISelect::class, $groupBy);
-        $this->assertEquals('SELECT t.field FROM  AS GROUP BY t.field2,t.field3 WITH ROLLUP', $groupBy->getSQL());
+        $this->assertEquals('SELECT `t`.`field` FROM `table` AS `t` GROUP BY `t`.`field2`,`t`.`field3` WITH ROLLUP', $groupBy->getSQL());
     }
 
     public function testHaving()
     {
-        $having = $this->instance->select('t.field')->having(function(ICriteria $criteria) {
+        $having = $this->instance->from('table', 't')->select('t.field')->having(function(ICriteria $criteria) {
             $criteria->and(function(ICriteria $criteria) {
-                $criteria->condition('SUM(t.field)', '>', 0);
+                $criteria->condition($criteria->sum('t.field'), '>', 0);
             });
         });
         $this->assertInstanceOf(ISelect::class, $having);
-        $this->assertEquals('SELECT t.field FROM  AS  HAVING ( ( SUM(t.field) > 0 ) )', $having->getSQL());
+        $this->assertEquals('SELECT `t`.`field` FROM `table` AS `t` HAVING ( ( SUM(`t`.`field`) > 0 ) )', $having->getSQL());
     }
 
     public function testOrderNonArray()
     {
-        $order = $this->instance->select('t.field')->orderBy('t.field4', 'DESC');
+        $order = $this->instance->from('table', 't')->select('t.field')->orderBy('t.field4', 'DESC');
         $this->assertInstanceOf(ISelect::class, $order);
-        $this->assertEquals('SELECT t.field FROM  AS  ORDER BY t.field4 DESC', $order->getSQL());
+        $this->assertEquals('SELECT `t`.`field` FROM `table` AS `t` ORDER BY `t`.`field4` DESC', $order->getSQL());
     }
 
     public function testOrderByArray()
     {
-        $order = $this->instance->select('t.field')->orderBy(['t.field' => 'DESC', 't.field2' => 'ASC'])->orderBy('t.field3')->orderBy('t.field4', 'DESC');
+        $order = $this->instance->from('table', 't')->select('t.field')->orderBy(['t.field' => 'DESC', 't.field2' => 'ASC'])->orderBy('t.field3')->orderBy('t.field4', 'DESC');
         $this->assertInstanceOf(ISelect::class, $order);
-        $this->assertEquals('SELECT t.field FROM  AS  ORDER BY t.field DESC,t.field2 ASC,t.field3 ASC,t.field4 DESC', $order->getSQL());
+        $this->assertEquals('SELECT `t`.`field` FROM `table` AS `t` ORDER BY `t`.`field` DESC,`t`.`field2` ASC,`t`.`field3` ASC,`t`.`field4` DESC', $order->getSQL());
     }
 
     public function testOrderByWithRollup()
     {
-        $order = $this->instance->select('t.field')->orderBy('t.field4', 'DESC')->orderByWithRollup(true);
+        $order = $this->instance->from('table', 't')->select('t.field')->orderBy('t.field4', 'DESC')->orderByWithRollup(true);
         $this->assertInstanceOf(ISelect::class, $order);
-        $this->assertEquals('SELECT t.field FROM  AS  ORDER BY t.field4 DESC WITH ROLLUP', $order->getSQL());
+        $this->assertEquals('SELECT `t`.`field` FROM `table` AS `t` ORDER BY `t`.`field4` DESC WITH ROLLUP', $order->getSQL());
     }
 
     public function testLimit()
     {
-        $limit = $this->instance->select('t.field')->limit(10);
+        $limit = $this->instance->from('table', 't')->select('t.field')->limit(10);
         $this->assertInstanceOf(ISelect::class, $limit);
-        $this->assertEquals('SELECT t.field FROM  AS  LIMIT 10', $limit->getSQL());
+        $this->assertEquals('SELECT `t`.`field` FROM `table` AS `t` LIMIT 10', $limit->getSQL());
     }
 
     public function testOffset()
     {
-        $offset = $this->instance->select('t.field')->offset(20);
+        $offset = $this->instance->from('table', 't')->select('t.field')->offset(20);
         $this->assertInstanceOf(ISelect::class, $offset);
-        $this->assertEquals('SELECT t.field FROM  AS  OFFSET 20', $offset->getSQL());
+        $this->assertEquals('SELECT `t`.`field` FROM `table` AS `t` OFFSET 20', $offset->getSQL());
     }
 
     public function testSubQuery()
@@ -329,7 +350,7 @@ class SelectIntegrationTest extends TestCase
             });
         $this->assertInstanceOf(ISelect::class, $subquery);
         $this->assertInstanceOf(ISelect::class, $principal);
-        $this->assertEquals('SELECT t2.field FROM table2 AS t2 WHERE ( t2.field = (SELECT t.field FROM table AS t) )', $principal->getSQL());
+        $this->assertEquals('SELECT `t2`.`field` FROM `table2` AS `t2` WHERE ( `t2`.`field` = (SELECT `t`.`field` FROM `table` AS `t`) )', $principal->getSQL());
     }
 
     public function testTablesInQuery()
@@ -348,7 +369,7 @@ class SelectIntegrationTest extends TestCase
         $this->assertInstanceOf(ISelect::class, $subquery);
         $this->assertInstanceOf(ISelect::class, $principal);
         $this->assertEquals(['table4', 'table2', 'table3', 'table'], $principal->getTablesInQuery());
-        $this->assertEquals('SELECT (SELECT t4.field FROM table4 AS t4) AS item FROM table2 AS t2 LEFT JOIN (table3 AS t3) ON (( t3.field = t2.field )) WHERE ( t2.field = (SELECT t.field FROM table AS t) )', $principal->getSQL());
+        $this->assertEquals('SELECT (SELECT `t4`.`field` FROM `table4` AS `t4`) AS `item` FROM `table2` AS `t2` LEFT JOIN (`table3` AS `t3`) ON (( `t3`.`field` = `t2`.`field` )) WHERE ( `t2`.`field` = (SELECT `t`.`field` FROM `table` AS `t`) )', $principal->getSQL());
     }
 
     public function testTablesInQueryManySelectQuery()
@@ -371,6 +392,6 @@ class SelectIntegrationTest extends TestCase
         $this->assertInstanceOf(ISelect::class, $subquery);
         $this->assertInstanceOf(ISelect::class, $principal);
         $this->assertEquals(['table4', 'table5', 'table2', 'table3', 'table'], $principal->getTablesInQuery());
-        $this->assertEquals('SELECT (SELECT t4.field FROM table4 AS t4) AS value1,(SELECT t5.field FROM table5 AS t5) AS value2 FROM table2 AS t2 LEFT JOIN (table3 AS t3) ON (( t3.field = t2.field )) WHERE ( t2.field = (SELECT t.field FROM table AS t) )', $principal->getSQL());
+        $this->assertEquals('SELECT (SELECT `t4`.`field` FROM `table4` AS `t4`) AS `value1`,(SELECT `t5`.`field` FROM `table5` AS `t5`) AS `value2` FROM `table2` AS `t2` LEFT JOIN (`table3` AS `t3`) ON (( `t3`.`field` = `t2`.`field` )) WHERE ( `t2`.`field` = (SELECT `t`.`field` FROM `table` AS `t`) )', $principal->getSQL());
     }
 }

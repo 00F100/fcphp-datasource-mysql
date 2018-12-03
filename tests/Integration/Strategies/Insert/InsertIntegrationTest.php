@@ -162,7 +162,7 @@ class InsertIntegrationTest extends TestCase
             'content5'
         ]);
         $this->assertInstanceOf(IInsert::class, $values);
-        $this->assertEquals('INSERT INTO `table2` (`column1`,`column2`,`column3`,`column4`,`column5`) VALUES (SELECT t.field1,t.field2,t.field3,t.field4,t.field5 FROM table AS t)', $values->getSQL());
+        $this->assertEquals('INSERT INTO `table2` (`column1`,`column2`,`column3`,`column4`,`column5`) VALUES (SELECT `t`.`field1`,`t`.`field2`,`t`.`field3`,`t`.`field4`,`t`.`field5` FROM `table` AS `t`)', $values->getSQL());
         $this->assertEquals(['table2', 'table'], $values->getTablesInQuery());
     }
 

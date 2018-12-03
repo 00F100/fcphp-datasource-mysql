@@ -248,13 +248,16 @@ namespace FcPhp\Datasource\MySQL\Strategies\Select
                         }
                         $fieldSQL = '(' . $field->getSQL() . ')';
                         if(!is_int($alias)) {
-                            $fieldSQL .= ' AS ' . $alias;
+                            $fieldSQL .= ' AS `' . $alias . '`';
                         }
                         $newFields[] = $fieldSQL;
                     }else{
-                        $fieldSQL = $field;
+                        $fieldsExp = explode('.', $field);
+                        if(count($fieldsExp) == 2) {
+                            $fieldSQL = '`' . $fieldsExp[0] . '`.`' . $fieldsExp[1] . '`';
+                        }
                         if(!is_int($alias)) {
-                            $fieldSQL .= ' AS ' . $alias;
+                            $fieldSQL .= ' AS `' . $alias . '`';
                         }
                         $newFields[] = $fieldSQL;
                     }
@@ -274,10 +277,25 @@ namespace FcPhp\Datasource\MySQL\Strategies\Select
                         }
                     }
                     $fields = '(' . $fields->getSQL() . ')';
+                    if(!empty($alias)) {
+                        $fields .= ' AS `' . $alias . '`';
+                    }
+                }else{
+                    if(gettype($fields) == 'object') {
+                        $fields = $fields->call($this);
+                    }else{
+                        $fieldsExp = explode('.', $fields);
+                        if(count($fieldsExp) == 2) {
+                            $fields = '`' . $fieldsExp[0] . '`.`' . $fieldsExp[1] . '`';
+                        }else{
+                            $fields = '`' . $fields . '`';
+                        }
+                    }
+                    if(!empty($alias)) {
+                        $fields .= ' AS `' . $alias . '`';
+                    }
                 }
-                if(!empty($alias)) {
-                    $fields .= ' AS ' . $alias;
-                }
+                
                 $fields = [$fields];
             }
             $this->select = $fields;
@@ -291,7 +309,7 @@ namespace FcPhp\Datasource\MySQL\Strategies\Select
          * @param string $alias alias of Table
          * @return FcPhp\Datasource\MySQL\Interfaces\Strategies\Select\ISelect
          */
-        public function from(string $table, string $alias) :ISelect
+        public function from(string $table, string $alias = null) :ISelect
         {
             $this->table = $table;
             $this->tableAlias = $alias;
@@ -452,7 +470,7 @@ namespace FcPhp\Datasource\MySQL\Strategies\Select
                 ($this->sqlCalcFoundRows == true ? ' SQL_CALC_FOUND_ROWS' : '') .
                 ' ' . implode(',', $this->select)
             ]), implode('', [
-                ' ' . $this->table . ' AS ' . $this->tableAlias,
+                ($this->tableAlias ? ' `' . $this->table . '` AS `' . $this->tableAlias . '`' : ' `' . $this->table . '`'),
                 (count($this->join) > 0 ? ' ' . $this->mountJoin($this->join) : ''),
                 (count($this->where) > 0 ? ' WHERE ' . $this->mountWhere($this->where) : ''),
                 count($this->groupBy) > 0 ? $this->mountGroupBy($this->groupBy) : '',
@@ -515,8 +533,11 @@ namespace FcPhp\Datasource\MySQL\Strategies\Select
         private function mountJoinTable(array $tables) :string
         {
             foreach($tables as $index => $table) {
+                $table = $tables[$index];
                 if(!is_int($index)) {
-                    $tables[$index] .= ' AS ' . $index;
+                    $tables[$index] = '`' . $table . '` AS `' . $index . '`';
+                }else{
+                    $tables[$index] = '`' . $table . '`';
                 }
             }
             return '(' . implode(',', $tables) . ')';
@@ -564,7 +585,11 @@ namespace FcPhp\Datasource\MySQL\Strategies\Select
          */
         private function mountGroupBy($groupBy) :string
         {
-            return 'GROUP BY ' . implode(',', $this->groupBy);
+            $groupBy = $this->groupBy;
+            foreach($groupBy as $index => $item) {
+                $groupBy[$index] = $this->mountField($item);
+            }
+            return ' GROUP BY ' . implode(',', $groupBy);
         }
 
         /**
@@ -592,9 +617,44 @@ namespace FcPhp\Datasource\MySQL\Strategies\Select
                 $orders = array_merge($orders, $order);
             }
             foreach($orders as $name => $order) {
-                $ordersToSql[] = $name . ' ' . $order;
+                $ordersToSql[] = $this->mountField($name) . ' ' . $order;
             }
             return 'ORDER BY ' . implode(',', $ordersToSql);
+        }
+
+        /**
+         * Method to return field with `single quote`
+         *
+         * @return array
+         */
+        private function mountField(string $field)
+        {
+            $fieldExp = explode('.', $field);
+            return '`' . $fieldExp[0] . '`.`' . $fieldExp[1] . '`';
+        }
+        
+        /**
+         * Method to return SUM() function
+         *
+         * @return object
+         */
+        public function sum($field) :object
+        {
+            return function() use ($field) {
+                return 'SUM(' . $this->mountField($field) . ')';
+            };
+        }
+        
+        /**
+         * Method to return RAW content
+         *
+         * @return object
+         */
+        public function raw($content) :object
+        {
+            return function() use ($content) {
+                return $content;
+            };
         }
     }
 }

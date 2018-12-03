@@ -86,7 +86,7 @@ namespace FcPhp\Datasource\MySQL\Interfaces\Strategies\Select
          * @param string $alias alias of Table
          * @return FcPhp\Datasource\MySQL\Interfaces\Strategies\Select\ISelect
          */
-        public function from(string $table, string $alias) :ISelect;
+        public function from(string $table, string $alias = null) :ISelect;
 
         /**
          * Method to define many joins
