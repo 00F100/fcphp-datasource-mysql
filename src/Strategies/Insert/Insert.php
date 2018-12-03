@@ -174,7 +174,7 @@ namespace FcPhp\Datasource\MySQL\Strategies\Insert
                 (!empty($this->priority) ? ' ' . $this->priority : '') .
                 ($this->ignore ? ' IGNORE' : '') .
                 ($this->into ? ' INTO' : '') .
-                (!empty($this->table) ? ' ' . $this->table : '') .
+                (!empty($this->table) ? ' `' . $this->table . '`' : '') .
                 (count($this->columns) > 0 ? ' (' . $this->mountColumns($this->columns) . ')' : '') .
                 (count($this->values) > 0 ? ' VALUES (' . $this->mountValues($this->columns, $this->values) . ')' : '') .
                 (count($this->duplicateKey) > 0 ? ' ON DUPLICATE KEY UPDATE ' . $this->mountDuplicateKey($this->duplicateKey) : '')
@@ -199,7 +199,7 @@ namespace FcPhp\Datasource\MySQL\Strategies\Insert
          */
         private function mountColumns(array $columns)
         {
-            return implode(',', $columns);
+            return '`' . implode('`,`', $columns) . '`';
         }
 
         /**
